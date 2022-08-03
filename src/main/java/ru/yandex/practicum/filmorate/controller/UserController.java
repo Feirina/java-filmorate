@@ -55,6 +55,9 @@ public class UserController {
             log.error("При создании или обновлении пользователя возникла ошибка при вводе даты рождения");
             throw new ValidationException("Введена неккоректная дата рождения");
         }
+        if (user.getId() == 0) {
+            user.setId(1);
+        }
         users.put(user.getId(), user);
     }
 }

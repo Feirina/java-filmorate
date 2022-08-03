@@ -56,6 +56,9 @@ public class FilmController {
             log.error("При попытке создать или обновить фильм произошла ошибка продолжительности фильма");
             throw new ValidationException("Продолжительность фильма не может быть отрицательным значением");
         }
+        if (film.getId() == 0) {
+            film.setId(1);
+        }
         films.put(film.getId(), film);
     }
 }
