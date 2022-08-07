@@ -12,34 +12,35 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@RequestMapping("/users")
 @Slf4j
 public class UserController {
     private final Map<Integer, User> users = new HashMap<>();
 
-    @GetMapping("/users")
+    @GetMapping
     public List<User> findAll() {
         return new ArrayList<>(users.values());
     }
 
-    @PostMapping(value = "/users")
+    @PostMapping
     public User create(@RequestBody User user) {
-        getUser(user);
+        validationUser(user);
         log.info("Пользователь {} сохранен", user);
         return user;
     }
 
-    @PutMapping(value = "/users")
+    @PutMapping
     public User update(@RequestBody User user) {
         if (!users.containsKey(user.getId())) {
             log.error("При попытке обновить данные пользователя возникла ошибка");
             throw new ValidationException("Пользователя с данным id не существует");
         }
-        getUser(user);
+        validationUser(user);
         log.info("Данные пользователя {} обновлены", user);
         return user;
     }
 
-    private void getUser(@RequestBody User user) {
+    private void validationUser(@RequestBody User user) {
         if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
             log.error("При создании или обновлении пользователя возникла ошибка при вводе e-mail");
             throw new ValidationException("Введен неккоректный e-mail адрес");

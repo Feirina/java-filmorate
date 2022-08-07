@@ -14,11 +14,11 @@ import java.time.LocalDate;
 
 @SpringBootTest
 class FilmorateApplicationTests {
-	FilmController filmController;
-	UserController userController;
+	private FilmController filmController;
+	private UserController userController;
 
 	@BeforeEach
-	void start() {
+	void init() {
 		filmController = new FilmController();
 		userController = new UserController();
 	}
