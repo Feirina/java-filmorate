@@ -1,64 +1,64 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
-@Slf4j
 public class UserController {
-    private final Map<Integer, User> users = new HashMap<>();
+    private final UserService userService;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping
     public List<User> findAll() {
-        return new ArrayList<>(users.values());
+        return userService.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public User getUser(@PathVariable Long id) {
+        return userService.getUser(id);
     }
 
     @PostMapping
     public User create(@RequestBody User user) {
-        validationUser(user);
-        log.info("Пользователь {} сохранен", user);
-        return user;
+        return userService.createUser(user);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
     }
 
     @PutMapping
     public User update(@RequestBody User user) {
-        if (!users.containsKey(user.getId())) {
-            log.error("При попытке обновить данные пользователя возникла ошибка");
-            throw new ValidationException("Пользователя с данным id не существует");
-        }
-        validationUser(user);
-        log.info("Данные пользователя {} обновлены", user);
-        return user;
+        return userService.updateUser(user);
     }
 
-    private void validationUser(@RequestBody User user) {
-        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            log.error("При создании или обновлении пользователя возникла ошибка при вводе e-mail");
-            throw new ValidationException("Введен неккоректный e-mail адрес");
-        }
-        if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            log.error("При создании или обновлении пользователя возникла ошибка при вводе логина");
-            throw new ValidationException("Введен неккоректный логин");
-        }
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.error("При создании или обновлении пользователя возникла ошибка при вводе даты рождения");
-            throw new ValidationException("Введена неккоректная дата рождения");
-        }
-        if (user.getId() == 0) {
-            user.setId(1);
-        }
-        users.put(user.getId(), user);
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addUserToFriends(@PathVariable Long id, @PathVariable Long friendId) {
+        userService.addToFriends(id, friendId);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void deleteUserFromFriends(@PathVariable Long id, @PathVariable Long friendId) {
+        userService.removeFromFriends(id, friendId);
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<User> getListOfFriends(@PathVariable Long id) {
+        return userService.getListOfFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getListOfMutualFriends(@PathVariable Long id, @PathVariable Long otherId) {
+        return userService.getListOfMutualFriends(id, otherId);
     }
 }
