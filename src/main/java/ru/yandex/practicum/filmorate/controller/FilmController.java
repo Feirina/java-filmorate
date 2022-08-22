@@ -1,12 +1,15 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/films")
 public class FilmController {
@@ -23,7 +26,11 @@ public class FilmController {
     }
 
     @GetMapping("/{id}")
-    public Film getUser(@PathVariable Long id) {
+    public Film getFilm(@PathVariable Long id) {
+        if (!filmService.getInMemoryFilmStorage().getMap().containsKey(id)) {
+            log.error("При попытке получить данные фильма возникла ошибка");
+            throw new NotFoundException("Фильма с данным id не существует");
+        }
         return filmService.getFilm(id);
     }
 
@@ -34,11 +41,19 @@ public class FilmController {
 
     @DeleteMapping("/{id}")
     public void deleteFilm(@PathVariable Long id) {
+        if (!filmService.getInMemoryFilmStorage().getMap().containsKey(id)) {
+            log.error("При попытке удалить фильм возникла ошибка");
+            throw new NotFoundException("Фильма с данным id не существует");
+        }
         filmService.deleteFilm(id);
     }
 
     @PutMapping
     public Film update(@RequestBody Film film) {
+        if (!filmService.getInMemoryFilmStorage().getMap().containsKey(film.getId())) {
+            log.error("При попытке обновить данные фильма возникла ошибка");
+            throw new NotFoundException("Фильма с данным id не существует");
+        }
         return filmService.updateFilm(film);
     }
 

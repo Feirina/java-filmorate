@@ -3,71 +3,50 @@ package ru.yandex.practicum.filmorate.storage.film;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.Storage;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Component
 @Slf4j
-public class InMemoryFilmStorage implements FilmStorage{
+public class InMemoryFilmStorage extends Storage<Film> implements FilmStorage{
     private final Map<Long, Film> films = new HashMap<>();
     private Long countOfFilmId = 1L;
     private final static LocalDate DATE_OF_FIRST_FILM_RELEASE = LocalDate.of(1895, 12, 28);
 
-    public Map<Long, Film> getFilms() {
+    @Override
+    public Map<Long, Film> getMap() {
         return films;
     }
 
     @Override
-    public List<Film> getAll() {
-        return new ArrayList<>(films.values());
-    }
-
-    @Override
     public Film createFilm(Film film) {
-        validationFilm(film);
-        log.info("Фильм {} сохранен", film);
-        return film;
+        return create(film);
     }
 
     @Override
     public void deleteFilm(Long id) {
-        if (!films.containsKey(id)) {
-            log.error("При попытке удалить фильм возникла ошибка");
-            throw new NotFoundException("Фильма с данным id не существует");
-        }
-        films.remove(id);
+        delete(id);
     }
 
     @Override
     public Film updateFilm(Film film) {
-        if (!films.containsKey(film.getId())) {
-            log.error("При попытке обновить данные фильма возникла ошибка");
-            throw new NotFoundException("Фильма с данным id не существует");
-        }
-        validationFilm(film);
-        log.info("Фильм {} обновлен", film);
-        return film;
+        return update(film);
     }
 
     @Override
     public Film getFilm(Long id) {
-        if (!films.containsKey(id)) {
-            log.error("При попытке получить данные фильма возникла ошибка");
-            throw new NotFoundException("Фильма с данным id не существует");
-        }
         log.info("Данные фильма {} получены", films.get(id));
-        return films.get(id);
+        return get(id);
     }
 
-    private void validationFilm(@Valid @RequestBody Film film) {
+    @Override
+    public void validation(@Valid @RequestBody Film film) {
         if (film.getName() == null || film.getName().isBlank()) {
             log.error("При попытке создать или обновить фильм произошла ошибка названия фильма");
             throw new ValidationException("Название фильма не может быть пустым");

@@ -19,8 +19,12 @@ public class UserService implements UserStorage {
         this.inMemoryUserStorage = inMemoryUserStorage;
     }
 
+    public InMemoryUserStorage getInMemoryUserStorage() {
+        return inMemoryUserStorage;
+    }
+
     public void addToFriends(Long id, Long friendId) {
-        if (!inMemoryUserStorage.getUsers().containsKey(friendId)) {
+        if (!inMemoryUserStorage.getMap().containsKey(friendId)) {
             throw new NotFoundException("Невозможно добавить в друзья - пользователя с данным friendId не существует");
         }
         getUser(id).getFriends().add(friendId);
@@ -29,13 +33,14 @@ public class UserService implements UserStorage {
 
     public void removeFromFriends(Long id, Long friendId) {
         getUser(id).getFriends().remove(friendId);
+        getUser(friendId).getFriends().remove(id);
     }
 
     public List<User> getListOfMutualFriends(Long id, Long otherId) {
         List<User> listOfMutualFriends = new ArrayList<>();
         for (Long friendId : getUser(id).getFriends()) {
             if (getUser(otherId).getFriends().contains(friendId)) {
-                listOfMutualFriends.add(inMemoryUserStorage.getUsers().get(friendId));
+                listOfMutualFriends.add(inMemoryUserStorage.getMap().get(friendId));
             }
         }
         return listOfMutualFriends;
@@ -44,14 +49,14 @@ public class UserService implements UserStorage {
     public List<User> getListOfFriends(Long id) {
         List<User> listOfFriends = new ArrayList<>();
         for (Long friendId : getUser(id).getFriends()) {
-            listOfFriends.add(inMemoryUserStorage.getUsers().get(friendId));
+            listOfFriends.add(inMemoryUserStorage.getMap().get(friendId));
         }
         return listOfFriends;
     }
 
     @Override
-    public List<User> findAll() {
-        return inMemoryUserStorage.findAll();
+    public List<User> getAll() {
+        return inMemoryUserStorage.getAll();
     }
 
     @Override

@@ -19,6 +19,10 @@ public class FilmService implements FilmStorage {
         this.inMemoryFilmStorage = inMemoryFilmStorage;
     }
 
+    public InMemoryFilmStorage getInMemoryFilmStorage() {
+        return inMemoryFilmStorage;
+    }
+
     public void addLikeToFilm(Long filmId, Long userId) {
         Film film = getFilm(filmId);
         if (!film.getUsersIdsOfLikes().contains(userId)) {
@@ -37,7 +41,12 @@ public class FilmService implements FilmStorage {
     }
 
     public List<Film> getListOfMostPopularFilm(Integer count) {
-        return inMemoryFilmStorage.getFilms().values().stream().sorted().limit(count).collect(Collectors.toList());
+        return inMemoryFilmStorage.getMap()
+                .values()
+                .stream()
+                .sorted()
+                .limit(count)
+                .collect(Collectors.toList());
     }
 
     @Override
