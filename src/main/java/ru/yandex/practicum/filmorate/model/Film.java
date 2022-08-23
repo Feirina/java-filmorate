@@ -17,7 +17,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Film implements Comparable<Film> {
+public class Film {
     private Long id;
     @NotBlank
     private String name;
@@ -30,9 +30,4 @@ public class Film implements Comparable<Film> {
     private int countOfLike;
     @Builder.Default
     private Set<Long> usersIdsOfLikes = new HashSet<>();
-
-    @Override
-    public int compareTo(Film film) {
-        return Integer.compare(film.countOfLike, this.countOfLike);
-    }
 }

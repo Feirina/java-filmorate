@@ -12,8 +12,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class FilmService { //Это я запуталась из-за обсуждений в слаке, увидела у кого-то имплементацию
-                           //FilmStorage и слово "зависимость" в ТЗ и почему-то решила, что надо делать так >_<
+public class FilmService {
     private final FilmStorage filmStorage;
 
     @Autowired
@@ -42,7 +41,7 @@ public class FilmService { //Это я запуталась из-за обсуж
         return filmStorage.getMap()
                 .values()
                 .stream()
-                .sorted()
+                .sorted((o1, o2) -> Integer.compare(o2.getCountOfLike(), o1.getCountOfLike()))
                 .limit(count)
                 .collect(Collectors.toList());
     }
