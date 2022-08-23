@@ -1,30 +1,27 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class UserService implements UserStorage {
-    private final InMemoryUserStorage inMemoryUserStorage;
+@Slf4j
+public class UserService {
+    private final UserStorage userStorage;
 
     @Autowired
-    public UserService(InMemoryUserStorage inMemoryUserStorage) {
-        this.inMemoryUserStorage = inMemoryUserStorage;
-    }
-
-    public InMemoryUserStorage getInMemoryUserStorage() {
-        return inMemoryUserStorage;
+    public UserService(UserStorage userStorage) {
+        this.userStorage = userStorage;
     }
 
     public void addToFriends(Long id, Long friendId) {
-        if (!inMemoryUserStorage.getMap().containsKey(friendId)) {
+        if (!userStorage.getMap().containsKey(friendId)) {
             throw new NotFoundException("Невозможно добавить в друзья - пользователя с данным friendId не существует");
         }
         getUser(id).getFriends().add(friendId);
@@ -40,7 +37,7 @@ public class UserService implements UserStorage {
         List<User> listOfMutualFriends = new ArrayList<>();
         for (Long friendId : getUser(id).getFriends()) {
             if (getUser(otherId).getFriends().contains(friendId)) {
-                listOfMutualFriends.add(inMemoryUserStorage.getMap().get(friendId));
+                listOfMutualFriends.add(userStorage.getMap().get(friendId));
             }
         }
         return listOfMutualFriends;
@@ -49,33 +46,40 @@ public class UserService implements UserStorage {
     public List<User> getListOfFriends(Long id) {
         List<User> listOfFriends = new ArrayList<>();
         for (Long friendId : getUser(id).getFriends()) {
-            listOfFriends.add(inMemoryUserStorage.getMap().get(friendId));
+            listOfFriends.add(userStorage.getMap().get(friendId));
         }
         return listOfFriends;
     }
 
-    @Override
     public List<User> getAll() {
-        return inMemoryUserStorage.getAll();
+        return userStorage.getAll();
     }
 
-    @Override
     public User createUser(User user) {
-        return inMemoryUserStorage.createUser(user);
+        return userStorage.createUser(user);
     }
 
-    @Override
     public void deleteUser(Long id) {
-        inMemoryUserStorage.deleteUser(id);
+        if (!userStorage.getMap().containsKey(id)) {
+            log.error("При попытке удалить пользователя возникла ошибка");
+            throw new NotFoundException("Пользователя с данным id не существует");
+        }
+        userStorage.deleteUser(id);
     }
 
-    @Override
     public User updateUser(User user) {
-        return inMemoryUserStorage.updateUser(user);
+        if (!userStorage.getMap().containsKey(user.getId())) {
+            log.error("При попытке обновить данные пользователя возникла ошибка");
+            throw new NotFoundException("Пользователя с данным id не существует");
+        }
+        return userStorage.updateUser(user);
     }
 
-    @Override
     public User getUser(Long id) {
-        return inMemoryUserStorage.getUser(id);
+        if (!userStorage.getMap().containsKey(id)) {
+            log.error("При попытке получить данные пользователя возникла ошибка");
+            throw new NotFoundException("Пользователя с данным id не существует");
+        }
+        return userStorage.getUser(id);
     }
 }

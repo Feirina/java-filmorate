@@ -1,26 +1,24 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class FilmService implements FilmStorage {
-    private final InMemoryFilmStorage inMemoryFilmStorage;
+@Slf4j
+public class FilmService { //Это я запуталась из-за обсуждений в слаке, увидела у кого-то имплементацию
+                           //FilmStorage и слово "зависимость" в ТЗ и почему-то решила, что надо делать так >_<
+    private final FilmStorage filmStorage;
 
     @Autowired
-    public FilmService(InMemoryFilmStorage inMemoryFilmStorage) {
-        this.inMemoryFilmStorage = inMemoryFilmStorage;
-    }
-
-    public InMemoryFilmStorage getInMemoryFilmStorage() {
-        return inMemoryFilmStorage;
+    public FilmService(FilmStorage filmStorage) {
+        this.filmStorage = filmStorage;
     }
 
     public void addLikeToFilm(Long filmId, Long userId) {
@@ -41,7 +39,7 @@ public class FilmService implements FilmStorage {
     }
 
     public List<Film> getListOfMostPopularFilm(Integer count) {
-        return inMemoryFilmStorage.getMap()
+        return filmStorage.getMap()
                 .values()
                 .stream()
                 .sorted()
@@ -49,28 +47,35 @@ public class FilmService implements FilmStorage {
                 .collect(Collectors.toList());
     }
 
-    @Override
     public List<Film> getAll() {
-        return inMemoryFilmStorage.getAll();
+        return filmStorage.getAll();
     }
 
-    @Override
     public Film createFilm(Film film) {
-        return inMemoryFilmStorage.createFilm(film);
+        return filmStorage.createFilm(film);
     }
 
-    @Override
     public void deleteFilm(Long id) {
-        inMemoryFilmStorage.deleteFilm(id);
+        if (!filmStorage.getMap().containsKey(id)) {
+            log.error("При попытке удалить фильм возникла ошибка");
+            throw new NotFoundException("Фильма с данным id не существует");
+        }
+        filmStorage.deleteFilm(id);
     }
 
-    @Override
     public Film updateFilm(Film film) {
-        return inMemoryFilmStorage.updateFilm(film);
+        if (!filmStorage.getMap().containsKey(film.getId())) {
+            log.error("При попытке обновить данные фильма возникла ошибка");
+            throw new NotFoundException("Фильма с данным id не существует");
+        }
+        return filmStorage.updateFilm(film);
     }
 
-    @Override
     public Film getFilm(Long id) {
-        return inMemoryFilmStorage.getFilm(id);
+        if (!filmStorage.getMap().containsKey(id)) {
+            log.error("При попытке получить данные фильма возникла ошибка");
+            throw new NotFoundException("Фильма с данным id не существует");
+        }
+        return filmStorage.getFilm(id);
     }
 }
