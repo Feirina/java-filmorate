@@ -24,8 +24,8 @@ public class UserService {
         if (!userStorage.getMap().containsKey(friendId)) {
             throw new NotFoundException("Невозможно добавить в друзья - пользователя с данным friendId не существует");
         }
-        getUser(id).getFriends().add(friendId);
-        getUser(friendId).getFriends().add(id);
+        getUser(id).getFriends().put(friendId, false);
+        getUser(friendId).getFriends().put(id, false);
     }
 
     public void removeFromFriends(Long id, Long friendId) {
@@ -35,8 +35,8 @@ public class UserService {
 
     public List<User> getListOfMutualFriends(Long id, Long otherId) {
         List<User> listOfMutualFriends = new ArrayList<>();
-        for (Long friendId : getUser(id).getFriends()) {
-            if (getUser(otherId).getFriends().contains(friendId)) {
+        for (Long friendId : getUser(id).getFriends().keySet()) {
+            if (getUser(otherId).getFriends().containsKey(friendId)) {
                 listOfMutualFriends.add(userStorage.getMap().get(friendId));
             }
         }
@@ -45,7 +45,7 @@ public class UserService {
 
     public List<User> getListOfFriends(Long id) {
         List<User> listOfFriends = new ArrayList<>();
-        for (Long friendId : getUser(id).getFriends()) {
+        for (Long friendId : getUser(id).getFriends().keySet()) {
             listOfFriends.add(userStorage.getMap().get(friendId));
         }
         return listOfFriends;
