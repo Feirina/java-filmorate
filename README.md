@@ -2,20 +2,20 @@
 Template repository for Filmorate project.
 ![Filmorate Data Base diagram](https://github.com/Feirina/java-filmorate/blob/main/Filmorate%20DB%20diagram.jpg)
 
-*Получение списка всех фильмов*
+*Get all films*
 ```sql
 SELECT *
 FROM film;
 ```
 
-*Получение фильма по id*
+*Get film by id*
 ```sql
 SELECT *
 FROM film
 WHERE film_id = id;
 ```
 
-*Получение списка n самых популярных фильмов*
+*Get most popular n films*
 ```sql
 SELECT *
 FROM film
@@ -28,20 +28,20 @@ WHERE film_id IN (SELECT f.film_id,
                   LIMIT n);
 ```
 
-*Получение списка всех пользователей*
+*Get all users*
 ```sql
 SELECT *
 FROM user;
 ```
 
-*Получение пользователя по id*
+*Get user by id*
 ```sql
 SELECT *
 FROM user
 WHERE user_id = id;
 ```
 
-*Получение списка друзей пользователя по id*
+*Get user`s list of friends by id*
 ```sql
 SELECT *
 FROM user
@@ -50,7 +50,7 @@ WHERE user_id IN (SELECT friend_id
                   WHERE user_id = id);
 ```
 
-*Получение списка общих друзей пользователя по id и otherId*
+*Get list of mutual friends of user and other user*
 ```sql
 SELECT *
 FROM user
