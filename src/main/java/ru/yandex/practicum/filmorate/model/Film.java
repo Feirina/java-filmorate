@@ -23,13 +23,14 @@ public class Film {
     private String name;
     @Max(200)
     private String description;
-    @Past
-    private LocalDate releaseDate;
     @Positive
     private int duration;
+    @Past
+    private LocalDate releaseDate;
     private int countOfLike;
     @Builder.Default
     private Set<Long> usersIdsOfLikes = new HashSet<>();
-    private Set<String> genre = new HashSet<>();
-    private Rating rating;
+    @Builder.Default
+    private Set<Genre> genres = new HashSet<>();
+    private Mpa mpa;
 }
