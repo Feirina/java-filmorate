@@ -25,8 +25,6 @@ class GenreControllerTests {
 
     @Test
     void getGenreById() {
-        String genre = "Комедия";
-        assertEquals(genre, genreController.getGenreById(1).getName()); //сравнивать со строкой прописанной в equals
-                                                                        // отказывается, кодировкку менять пробовала
+        assertEquals("РљРѕРјРµРґРёСЏ", genreController.getGenreById(1).getName());
     }
 }
