@@ -12,7 +12,7 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import java.util.List;
 
 @Service
-public class FilmService {
+public class FilmService implements FilmorateService<Film> {
     private final FilmStorage filmStorage;
     private final LikesDaoStorage likesStorage;
     private final UserStorage userStorage;
@@ -47,6 +47,7 @@ public class FilmService {
         return likesStorage.getListOfMostPopularFilm(count);
     }
 
+    @Override
     public List<Film> getAll() {
         return filmStorage.getAll();
     }
@@ -56,18 +57,25 @@ public class FilmService {
     }
 
     public void deleteFilm(Long id) {
-        if (filmStorage.getFilm(id) == null) throw new NotFoundException("Фильма с данным id не существует");
+        if (filmStorage.getFilm(id) == null) {
+            throw new NotFoundException("Фильма с данным id не существует");
+        }
         filmStorage.deleteFilm(id);
     }
 
     public Film updateFilm(Film film) {
-        if (filmStorage.getFilm(film.getId()) == null) throw new NotFoundException("Фильма с данным id не существует");
+        if (filmStorage.getFilm(film.getId()) == null) {
+            throw new NotFoundException("Фильма с данным id не существует");
+        }
         return filmStorage.updateFilm(film);
     }
 
-    public Film getFilm(Long id) {
+    @Override
+    public Film getById(Long id) {
         final Film film = filmStorage.getFilm(id);
-        if (film == null) throw new NotFoundException("Фильма с данным id не существует");
+        if (film == null) {
+            throw new NotFoundException("Фильма с данным id не существует");
+        }
         return film;
     }
 }

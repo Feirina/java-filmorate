@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface MpaDaoStorage {
     List<Mpa> getAllRating();
-    Mpa getRatingById(Integer id);
+    Mpa getRatingById(Long id);
 }

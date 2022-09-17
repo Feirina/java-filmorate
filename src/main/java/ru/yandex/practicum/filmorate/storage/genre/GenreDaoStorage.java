@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface GenreDaoStorage {
     List<Genre> getAllGenre();
-    Genre getGenreById(Integer id);
+    Genre getGenreById(Long id);
 }

@@ -20,11 +20,11 @@ public class MpaController {
 
     @GetMapping
     public List<Mpa> getAllRating() {
-        return ratingService.getAllRating();
+        return ratingService.getAll();
     }
 
     @GetMapping("/{id}")
-    public Mpa getRatingById(@PathVariable Integer id) {
-        return ratingService.getRatingById(id);
+    public Mpa getRatingById(@PathVariable Long id) {
+        return ratingService.getById(id);
     }
 }

@@ -25,6 +25,6 @@ class GenreControllerTests {
 
     @Test
     void getGenreById() {
-        assertEquals("Комедия", genreController.getGenreById(1).getName());
+        assertEquals("Комедия", genreController.getGenreById(1L).getName());
     }
 }

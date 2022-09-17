@@ -9,11 +9,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.Mappers;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -21,22 +20,30 @@ import java.util.List;
 @Component("UserDbStorage")
 public class UserDbStorage implements UserStorage{
     private final JdbcTemplate jdbcTemplate;
+    private final Mappers mappers;
 
-    public UserDbStorage(JdbcTemplate jdbcTemplate) {
+    public UserDbStorage(JdbcTemplate jdbcTemplate, Mappers mappers) {
         this.jdbcTemplate = jdbcTemplate;
+        this.mappers = mappers;
     }
 
     @Override
     public List<User> getAll() {
         final String sql = "SELECT * FROM filmorate_user";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> makeUser(rs));
+        return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeUser(rs));
     }
 
     @Override
     public User createUser(User user) {
         validation(user);
-        if (user == null)
+        if (user == null) {
             throw new NotFoundException("Невозможно создать пользователя. Передано пустое значение пользователя.");
+        }
+        makeUser(user);
+        return user;
+    }
+
+    private void makeUser(User user) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         final String sql = "INSERT INTO filmorate_user (email, login, name, birthday) VALUES (?, ?, ?, ?)";
         jdbcTemplate.update(connection -> {
@@ -48,7 +55,6 @@ public class UserDbStorage implements UserStorage{
             return statement;
         }, keyHolder);
         user.setId(keyHolder.getKey().longValue());
-        return user;
     }
 
     @Override
@@ -68,19 +74,9 @@ public class UserDbStorage implements UserStorage{
     @Override
     public User getUser(Long id) {
         final String sql = "SELECT * FROM filmorate_user WHERE id = ?";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> makeUser(rs), id)
+        return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeUser(rs), id)
                 .stream()
                 .findAny().orElse(null);
-    }
-
-    private User makeUser(ResultSet rs) throws SQLException {
-        return User.builder()
-                .id(rs.getLong("id"))
-                .email(rs.getString("email"))
-                .login(rs.getString("login"))
-                .name(rs.getString("name"))
-                .birthday(rs.getDate("birthday").toLocalDate())
-                .build();
     }
 
     public void validation(@RequestBody User user) {

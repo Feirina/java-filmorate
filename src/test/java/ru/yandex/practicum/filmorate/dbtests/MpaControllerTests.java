@@ -25,6 +25,6 @@ class MpaControllerTests {
 
     @Test
     void getGenreByIdTest() {
-        assertEquals("G", mpaController.getRatingById(1).getName());
+        assertEquals("G", mpaController.getRatingById(1L).getName());
     }
 }

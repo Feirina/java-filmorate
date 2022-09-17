@@ -31,7 +31,7 @@ class FilmControllerTests {
             .description("new Film")
             .duration(130)
             .releaseDate(LocalDate.of(2002, 5, 20))
-            .mpa(Mpa.builder().id(1).name("G").build())
+            .mpa(Mpa.builder().id(1L).name("G").build())
             .build();
     final private User user = User.builder()
             .email("email@co")

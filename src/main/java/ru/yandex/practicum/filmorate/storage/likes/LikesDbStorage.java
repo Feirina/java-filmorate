@@ -3,18 +3,18 @@ package ru.yandex.practicum.filmorate.storage.likes;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.Mappers;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 
 @Component
 public class LikesDbStorage implements LikesDaoStorage{
     private final JdbcTemplate jdbcTemplate;
+    private final Mappers mappers;
 
-    public LikesDbStorage(JdbcTemplate jdbcTemplate) {
+    public LikesDbStorage(JdbcTemplate jdbcTemplate, Mappers mappers) {
         this.jdbcTemplate = jdbcTemplate;
+        this.mappers = mappers;
     }
 
     @Override
@@ -34,17 +34,6 @@ public class LikesDbStorage implements LikesDaoStorage{
         final String sql = "SELECT f.*, m.* FROM film AS f LEFT JOIN user_likes_film AS ulf ON f.id = ulf.film_id " +
                 "LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id" +
                 " GROUP BY f.id ORDER BY COUNT(ulf.user_id) DESC LIMIT ?";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), count);
-    }
-
-    private Film makeFilm(ResultSet rs) throws SQLException {
-        return Film.builder()
-                .id(rs.getLong("id"))
-                .name(rs.getString("name"))
-                .description(rs.getString("description"))
-                .releaseDate(rs.getDate("release_date").toLocalDate())
-                .duration(rs.getInt("duration"))
-                .mpa(Mpa.builder().id(rs.getInt("mpa_id")).name(rs.getString("mpa_name")).build())
-                .build();
+        return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeFilm(rs), count);
     }
 }

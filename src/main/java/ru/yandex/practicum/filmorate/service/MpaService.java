@@ -8,20 +8,24 @@ import ru.yandex.practicum.filmorate.storage.rating.MpaDaoStorage;
 import java.util.List;
 
 @Service
-public class MpaService {
+public class MpaService implements FilmorateService<Mpa> {
     private final MpaDaoStorage ratingStorage;
 
     public MpaService(MpaDaoStorage ratingStorage) {
         this.ratingStorage = ratingStorage;
     }
 
-    public List<Mpa> getAllRating() {
+    @Override
+    public List<Mpa> getAll() {
         return ratingStorage.getAllRating();
     }
 
-    public Mpa getRatingById(Integer id) {
+    @Override
+    public Mpa getById(Long id) {
         final Mpa mpa = ratingStorage.getRatingById(id);
-        if (mpa == null) throw new NotFoundException("Рейтинга с данным id не существует");
+        if (mpa == null) {
+            throw new NotFoundException("Рейтинга с данным id не существует");
+        }
         return mpa;
     }
 }

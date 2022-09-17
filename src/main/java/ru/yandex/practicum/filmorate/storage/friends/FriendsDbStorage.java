@@ -3,23 +3,24 @@ package ru.yandex.practicum.filmorate.storage.friends;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.Mappers;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 
 @Component
 public class FriendsDbStorage implements FriendsDaoStorage{
     private final JdbcTemplate jdbcTemplate;
+    private final Mappers mappers;
 
-    public FriendsDbStorage(JdbcTemplate jdbcTemplate) {
+    public FriendsDbStorage(JdbcTemplate jdbcTemplate, Mappers mappers) {
         this.jdbcTemplate = jdbcTemplate;
+        this.mappers = mappers;
     }
 
     @Override
     public List<User> getListOfFriends(Long userId) {
         final String sql = "SELECT * FROM filmorate_user WHERE id IN (SELECT friend_id FROM friend_list WHERE user_id = ?)";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> makeUser(rs), userId);
+        return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeUser(rs), userId);
     }
 
     @Override
@@ -39,16 +40,6 @@ public class FriendsDbStorage implements FriendsDaoStorage{
         final String sql = "SELECT * FROM filmorate_user WHERE id IN (SELECT friend_id FROM friend_list " +
                 "WHERE user_id = ? AND friend_id IN " +
                 "(SELECT friend_id FROM friend_list WHERE user_id = ?))";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> makeUser(rs), userId, otherId);
-    }
-
-    private User makeUser(ResultSet rs) throws SQLException {
-        return User.builder()
-                .id(rs.getLong("id"))
-                .email(rs.getString("email"))
-                .login(rs.getString("login"))
-                .name(rs.getString("name"))
-                .birthday(rs.getDate("birthday").toLocalDate())
-                .build();
+        return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeUser(rs), userId, otherId);
     }
 }

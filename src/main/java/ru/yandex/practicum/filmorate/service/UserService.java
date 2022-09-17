@@ -11,7 +11,7 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import java.util.List;
 
 @Service
-public class UserService {
+public class UserService implements FilmorateService<User> {
     private final UserStorage userStorage;
     private final FriendsDaoStorage friendsStorage;
 
@@ -50,6 +50,7 @@ public class UserService {
         return friendsStorage.getListOfFriends(id);
     }
 
+    @Override
     public List<User> getAll() {
         return userStorage.getAll();
     }
@@ -59,18 +60,25 @@ public class UserService {
     }
 
     public void deleteUser(Long id) {
-        if (userStorage.getUser(id) == null) throw new NotFoundException("Пользователя с данным id не существует");
+        if (userStorage.getUser(id) == null) {
+            throw new NotFoundException("Пользователя с данным id не существует");
+        }
         userStorage.deleteUser(id);
     }
 
     public User updateUser(User user) {
-        if (userStorage.getUser(user.getId()) == null) throw new NotFoundException("Пользователя с данным id не существует");
+        if (userStorage.getUser(user.getId()) == null) {
+            throw new NotFoundException("Пользователя с данным id не существует");
+        }
         return userStorage.updateUser(user);
     }
 
-    public User getUser(Long id) {
+    @Override
+    public User getById(Long id) {
         final User user = userStorage.getUser(id);
-        if (user == null) throw new NotFoundException("Пользователя с данным id не существует");
+        if (user == null) {
+            throw new NotFoundException("Пользователя с данным id не существует");
+        }
         return user;
     }
 }

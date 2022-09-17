@@ -8,20 +8,22 @@ import ru.yandex.practicum.filmorate.storage.genre.GenreDaoStorage;
 import java.util.List;
 
 @Service
-public class GenreService {
+public class GenreService implements FilmorateService<Genre> {
     private final GenreDaoStorage genreStorage;
 
     public GenreService(GenreDaoStorage genreStorage) {
         this.genreStorage = genreStorage;
     }
 
-    public List<Genre> getAllGenre() {
+    public List<Genre> getAll() {
         return genreStorage.getAllGenre();
     }
 
-    public Genre getGenreById(Integer id) {
+    public Genre getById(Long id) {
         Genre genre = genreStorage.getGenreById(id);
-        if (genre == null) throw new NotFoundException("Жанра с данным id не существует");
+        if (genre == null) {
+            throw new NotFoundException("Жанра с данным id не существует");
+        }
         return genre;
     }
 }
