@@ -91,6 +91,9 @@ public class UserDbStorage implements UserStorage{
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
+        if (user.getBirthday() == null) {
+            throw new ValidationException("Поле даты рождения не может быть пустым");
+        }
         if (user.getBirthday().isAfter(LocalDate.now())) {
             log.error("При создании или обновлении пользователя возникла ошибка при вводе даты рождения");
             throw new ValidationException("Введена неккоректная дата рождения");
