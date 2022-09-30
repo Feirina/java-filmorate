@@ -1,56 +1,56 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.friends.FriendsDaoStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@Slf4j
-public class UserService {
+public class UserService implements FilmorateService<User> {
     private final UserStorage userStorage;
+    private final FriendsDaoStorage friendsStorage;
+
 
     @Autowired
-    public UserService(UserStorage userStorage) {
+    public UserService(@Qualifier("UserDbStorage") UserStorage userStorage, FriendsDaoStorage friendsStorage) {
         this.userStorage = userStorage;
+        this.friendsStorage = friendsStorage;
     }
 
     public void addToFriends(Long id, Long friendId) {
-        if (!userStorage.getMap().containsKey(friendId)) {
-            throw new NotFoundException("Невозможно добавить в друзья - пользователя с данным friendId не существует");
+        if (userStorage.getUser(id) == null || userStorage.getUser(friendId) == null) {
+            throw new NotFoundException("Невозможно добавить в друзья - пользователя с данным id не существует");
         }
-        getUser(id).getFriends().put(friendId, false);
-        getUser(friendId).getFriends().put(id, false);
+        friendsStorage.addToFriends(id, friendId);
     }
 
     public void removeFromFriends(Long id, Long friendId) {
-        getUser(id).getFriends().remove(friendId);
-        getUser(friendId).getFriends().remove(id);
+        if (userStorage.getUser(id) == null || userStorage.getUser(friendId) == null) {
+            throw new NotFoundException("Невозможно удалить из друзей - пользователя с данным id не существует");
+        }
+        friendsStorage.removeFromFriends(id, friendId);
     }
 
     public List<User> getListOfMutualFriends(Long id, Long otherId) {
-        List<User> listOfMutualFriends = new ArrayList<>();
-        for (Long friendId : getUser(id).getFriends().keySet()) {
-            if (getUser(otherId).getFriends().containsKey(friendId)) {
-                listOfMutualFriends.add(userStorage.getMap().get(friendId));
-            }
+        if (userStorage.getUser(id) == null || userStorage.getUser(otherId) == null) {
+            throw new NotFoundException("Невозможно получить список общих друзей - пользователя с данным id не существует");
         }
-        return listOfMutualFriends;
+        return friendsStorage.getListOfMutualFriends(id, otherId);
     }
 
     public List<User> getListOfFriends(Long id) {
-        List<User> listOfFriends = new ArrayList<>();
-        for (Long friendId : getUser(id).getFriends().keySet()) {
-            listOfFriends.add(userStorage.getMap().get(friendId));
+        if (userStorage.getUser(id) == null) {
+            throw new NotFoundException("Невозможно получить список друзей - пользователя с данным id не существует");
         }
-        return listOfFriends;
+        return friendsStorage.getListOfFriends(id);
     }
 
+    @Override
     public List<User> getAll() {
         return userStorage.getAll();
     }
@@ -60,26 +60,25 @@ public class UserService {
     }
 
     public void deleteUser(Long id) {
-        if (!userStorage.getMap().containsKey(id)) {
-            log.error("При попытке удалить пользователя возникла ошибка");
+        if (userStorage.getUser(id) == null) {
             throw new NotFoundException("Пользователя с данным id не существует");
         }
         userStorage.deleteUser(id);
     }
 
     public User updateUser(User user) {
-        if (!userStorage.getMap().containsKey(user.getId())) {
-            log.error("При попытке обновить данные пользователя возникла ошибка");
+        if (userStorage.getUser(user.getId()) == null) {
             throw new NotFoundException("Пользователя с данным id не существует");
         }
         return userStorage.updateUser(user);
     }
 
-    public User getUser(Long id) {
-        if (!userStorage.getMap().containsKey(id)) {
-            log.error("При попытке получить данные пользователя возникла ошибка");
+    @Override
+    public User getById(Long id) {
+        final User user = userStorage.getUser(id);
+        if (user == null) {
             throw new NotFoundException("Пользователя с данным id не существует");
         }
-        return userStorage.getUser(id);
+        return user;
     }
 }

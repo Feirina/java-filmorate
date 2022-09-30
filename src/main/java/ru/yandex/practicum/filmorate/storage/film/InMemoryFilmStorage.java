@@ -12,12 +12,12 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
+@Component("InMemoryFilmStorage")
 @Slf4j
 public class InMemoryFilmStorage extends Storage<Film> implements FilmStorage{
     private final Map<Long, Film> films = new HashMap<>();
     private Long countOfFilmId = 1L;
-    private final static LocalDate DATE_OF_FIRST_FILM_RELEASE = LocalDate.of(1895, 12, 28);
+    private static final LocalDate DATE_OF_FIRST_FILM_RELEASE = LocalDate.of(1895, 12, 28);
 
     @Override
     public Map<Long, Film> getMap() {
