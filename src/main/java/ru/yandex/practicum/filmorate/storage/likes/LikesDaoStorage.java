@@ -7,5 +7,5 @@ import java.util.List;
 public interface LikesDaoStorage {
     void addLikeToFilm(Long filmId, Long userId);
     void deleteLikeOfFilm(Long filmId, Long userId);
-    List<Film> getListOfMostPopularFilm(Integer count);
+    List<Long> getListOfMostPopularFilm(Integer count, Integer genreId, Integer year);
 }
