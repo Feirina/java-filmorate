@@ -78,4 +78,10 @@ public class FilmService implements FilmorateService<Film> {
         }
         return film;
     }
+    public List<Film> searchFilm(String query, List<String> by) {
+        if (by.contains("title") && by.size() == 1) {
+            return filmStorage.searchFilmByTitle(query, by);
+        }
+        return null;
+    }
 }

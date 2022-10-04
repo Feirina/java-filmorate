@@ -131,4 +131,13 @@ public class FilmDbStorage implements FilmStorage{
             throw new ValidationException("Продолжительность фильма не может быть отрицательным значением");
         }
     }
+
+    public List<Film> searchFilmByTitle(String query, List<String> by) {
+        String sql = "Select film.*, mpa.* FROM film " +
+                "LEFT JOIN mpa ON film.mpa_id = mpa.mpa_id " +
+                "LEFT JOIN USER_LIKES_FILM ON film.id=USER_LIKES_FILM.FILM_ID " +
+                "WHERE film.name iLIKE CONCAT('%', ?, '%') " +
+                "GROUP BY film.id ORDER BY COUNT(USER_LIKES_FILM.USER_ID) DESC;";
+            return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeFilm(rs), query);
+    }
 }
