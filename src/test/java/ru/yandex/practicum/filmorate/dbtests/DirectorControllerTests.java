@@ -117,7 +117,7 @@ public class DirectorControllerTests {
         User user2 = userController.create(createUser());
 
         Director director1 = directorController.create(director);
-        film.setDirector(new HashSet<>(directorController.getAll()));
+        film.setDirectors(new HashSet<>(directorController.getAll()));
         Film film1 = filmController.create(film);
         filmController.addLikeToFilm(film1.getId(), user1.getId());
 
@@ -126,7 +126,7 @@ public class DirectorControllerTests {
         film2.setReleaseDate(LocalDate.of(2001, 5, 20));
         director2.setName("name2");
         director2 = directorController.create(director2);
-        film2.setDirector(new HashSet<>(directorController.getAll()));
+        film2.setDirectors(new HashSet<>(directorController.getAll()));
         film2 = filmController.create(film2);
         filmController.addLikeToFilm(film2.getId(), user1.getId());
         filmController.addLikeToFilm(film2.getId(), user2.getId());

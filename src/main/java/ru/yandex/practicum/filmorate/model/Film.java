@@ -34,6 +34,6 @@ public class Film {
     private Set<Genre> genres = new HashSet<>();
     private Mpa mpa;
     @Builder.Default
-    private Set<Director> director = new HashSet<>();
+    private Set<Director> directors = new HashSet<>();
 
 }

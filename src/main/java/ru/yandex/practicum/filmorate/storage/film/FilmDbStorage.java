@@ -39,7 +39,7 @@ public class FilmDbStorage implements FilmStorage{
         List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeFilm(rs));
         for (Film film : films) {
             film.setGenres(loadGenresByFilm(film.getId()));
-            film.setDirector(loadDirectorsByFilm(film.getId()));
+            film.setDirectors(loadDirectorsByFilm(film.getId()));
         }
         return films;
     }
@@ -97,7 +97,7 @@ public class FilmDbStorage implements FilmStorage{
                 .findAny().orElse(null);
         if (film != null) {
             film.setGenres(loadGenresByFilm(id));
-            film.setDirector(loadDirectorsByFilm(id));
+            film.setDirectors(loadDirectorsByFilm(id));
         }
         return film;
     }
@@ -133,7 +133,7 @@ public class FilmDbStorage implements FilmStorage{
         String sqlUpdateGenre = "DELETE FROM film_directors WHERE film_id = ?";
         jdbcTemplate.update(sqlUpdateGenre, film.getId());
         String sql = "INSERT INTO film_directors (film_id, director_id) VALUES (?, ?)";
-        Set<Director> directors = film.getDirector();
+        Set<Director> directors = film.getDirectors();
         if (directors == null) {
             return;
         }
