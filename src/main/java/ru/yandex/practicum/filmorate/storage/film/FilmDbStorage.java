@@ -84,8 +84,6 @@ public class FilmDbStorage implements FilmStorage{
                 "MPA_ID = ? WHERE id = ?";
         jdbcTemplate.update(sql, film.getName(), film.getDescription(), film.getDuration(), film.getReleaseDate(),
                 film.getMpa().getId(), film.getId());
-        String sqlUpdateGenre = "DELETE FROM film_genre WHERE film_id = ?";
-        jdbcTemplate.update(sqlUpdateGenre, film.getId());
         setGenreByFilm(film);
         setDirectorByFilm(film);
         return film;
@@ -112,8 +110,10 @@ public class FilmDbStorage implements FilmStorage{
     }
     
     private void setGenreByFilm(Film film) {
-        final String sqlGenre = "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)";
-        final Set<Genre> genres = film.getGenres();
+        String sqlUpdateGenre = "DELETE FROM film_genre WHERE film_id = ?";
+        jdbcTemplate.update(sqlUpdateGenre, film.getId());
+        String sqlGenre = "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)";
+        Set<Genre> genres = film.getGenres();
         if (genres == null) {
             return;
         }
@@ -130,8 +130,10 @@ public class FilmDbStorage implements FilmStorage{
     }
 
     private void setDirectorByFilm(Film film) {
-        final String sql = "INSERT INTO film_directors (film_id, director_id) VALUES (?, ?)";
-        final Set<Director> directors = film.getDirector();
+        String sqlUpdateGenre = "DELETE FROM film_directors WHERE film_id = ?";
+        jdbcTemplate.update(sqlUpdateGenre, film.getId());
+        String sql = "INSERT INTO film_directors (film_id, director_id) VALUES (?, ?)";
+        Set<Director> directors = film.getDirector();
         if (directors == null) {
             return;
         }

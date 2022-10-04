@@ -59,7 +59,8 @@ public class FilmService implements FilmorateService<Film> {
     }
 
     public Film createFilm(Film film) {
-        return filmStorage.createFilm(film);
+        Film createdFilm = filmStorage.createFilm(film);
+        return getById(createdFilm.getId());
     }
 
     public void deleteFilm(Long id) {
@@ -73,7 +74,8 @@ public class FilmService implements FilmorateService<Film> {
         if (filmStorage.getFilm(film.getId()) == null) {
             throw new NotFoundException("Фильма с данным id не существует");
         }
-        return filmStorage.updateFilm(film);
+        Film updatedFilm = filmStorage.updateFilm(film);
+        return getById(updatedFilm.getId());
     }
 
     @Override
