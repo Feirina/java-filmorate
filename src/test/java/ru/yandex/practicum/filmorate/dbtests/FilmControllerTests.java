@@ -13,9 +13,10 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -84,5 +85,37 @@ class FilmControllerTests {
         filmController.addLikeToFilm(film2.getId(), user1.getId());
         assertEquals(film2, filmController.getMostPopularFilms(1).stream()
                 .findFirst().orElse(null));
+    }
+
+    @Test
+    void searchFilmByTitleTest() {
+        Film filmTest2 = Film.builder()
+                .name("film")
+                .description("new Film")
+                .duration(130)
+                .releaseDate(LocalDate.of(2002, 5, 20))
+                .mpa(Mpa.builder().id(1L).name("G").build())
+                .build();
+        filmTest2.setUsersIdsOfLikes(new HashSet<>(Arrays.asList(1L, 2L)));
+        Film filmTest3 = Film.builder()
+                .name("title")
+                .description("new Film")
+                .duration(130)
+                .releaseDate(LocalDate.of(2002, 5, 20))
+                .mpa(Mpa.builder().id(1L).name("G").build())
+                .build();
+        filmTest2.setUsersIdsOfLikes(new HashSet<>(Arrays.asList(1L, 2L, 3L)));
+        filmController.create(film);
+        filmController.create(filmTest2);
+        filmController.create(filmTest3);
+        List<String> title = List.of("title");
+        List<Film> findFilms = filmController.searchFilm("i", title);
+        assertEquals(2, findFilms.size());
+        assertEquals(filmTest3.getName(), findFilms.get(1).getName());
+        findFilms = filmController.searchFilm("name", title);
+        assertEquals(1, findFilms.size());
+        assertEquals(film.getName(), findFilms.get(0).getName());
+        title = List.of("zero");
+        assertNull(filmController.searchFilm("i", title));
     }
 }
