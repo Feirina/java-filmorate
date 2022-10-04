@@ -10,4 +10,6 @@ public interface FilmStorage {
     void deleteFilm(Long id);
     Film updateFilm(Film film);
     Film getFilm(Long id);
+    List<Film> getRecommendationsFilm(Long id);
+    List<Film> getCommonFilms(Long id, Long friendId);
 }

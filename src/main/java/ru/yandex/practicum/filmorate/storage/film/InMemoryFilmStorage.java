@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.storage.Storage;
 import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component("InMemoryFilmStorage")
@@ -43,6 +44,16 @@ public class InMemoryFilmStorage extends Storage<Film> implements FilmStorage{
     public Film getFilm(Long id) {
         log.info("Данные фильма {} получены", films.get(id));
         return get(id);
+    }
+
+    @Override
+    public List<Film> getRecommendationsFilm(Long id) {
+        return null;
+    }
+
+    @Override
+    public List<Film> getCommonFilms(Long id, Long friendId) {
+        return null;
     }
 
     @Override
