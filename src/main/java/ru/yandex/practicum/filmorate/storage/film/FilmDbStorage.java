@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.Mappers;
@@ -39,6 +40,7 @@ public class FilmDbStorage implements FilmStorage{
         List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeFilm(rs));
         for (Film film : films) {
             film.setGenres(loadGenresByFilm(film.getId()));
+            film.setDirectors(loadDirectorsByFilm(film.getId()));
         }
         return films;
     }
@@ -51,6 +53,7 @@ public class FilmDbStorage implements FilmStorage{
         }
         makeFilm(film);
         setGenreByFilm(film);
+        setDirectorByFilm(film);
         return film;
     }
 
@@ -82,9 +85,8 @@ public class FilmDbStorage implements FilmStorage{
                 "MPA_ID = ? WHERE id = ?";
         jdbcTemplate.update(sql, film.getName(), film.getDescription(), film.getDuration(), film.getReleaseDate(),
                 film.getMpa().getId(), film.getId());
-        String sqlUpdateGenre = "DELETE FROM film_genre WHERE film_id = ?";
-        jdbcTemplate.update(sqlUpdateGenre, film.getId());
         setGenreByFilm(film);
+        setDirectorByFilm(film);
         return film;
     }
 
@@ -96,6 +98,7 @@ public class FilmDbStorage implements FilmStorage{
                 .findAny().orElse(null);
         if (film != null) {
             film.setGenres(loadGenresByFilm(id));
+            film.setDirectors(loadDirectorsByFilm(id));
         }
         return film;
     }
@@ -142,13 +145,35 @@ public class FilmDbStorage implements FilmStorage{
     }
     
     private void setGenreByFilm(Film film) {
-        final String sqlGenre = "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)";
-        final Set<Genre> genres = film.getGenres();
+        String sqlUpdateGenre = "DELETE FROM film_genre WHERE film_id = ?";
+        jdbcTemplate.update(sqlUpdateGenre, film.getId());
+        String sqlGenre = "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)";
+        Set<Genre> genres = film.getGenres();
         if (genres == null) {
             return;
         }
         for (Genre genre : genres) {
             jdbcTemplate.update(sqlGenre, film.getId(), genre.getId());
+        }
+    }
+
+    private Set<Director> loadDirectorsByFilm(Long id) {
+        final String sql = "SELECT * FROM director AS d INNER JOIN film_directors AS fd ON d.id = fd.director_id " +
+                "AND fd.film_id = ?";
+        List<Director> directors = jdbcTemplate.query(sql, (res, rowNum) -> mappers.makeDirector(res), id);
+        return new HashSet<>(directors);
+    }
+
+    private void setDirectorByFilm(Film film) {
+        String sqlUpdateGenre = "DELETE FROM film_directors WHERE film_id = ?";
+        jdbcTemplate.update(sqlUpdateGenre, film.getId());
+        String sql = "INSERT INTO film_directors (film_id, director_id) VALUES (?, ?)";
+        Set<Director> directors = film.getDirectors();
+        if (directors == null) {
+            return;
+        }
+        for (Director director : directors) {
+            jdbcTemplate.update(sql, film.getId(), director.getId());
         }
     }
 
