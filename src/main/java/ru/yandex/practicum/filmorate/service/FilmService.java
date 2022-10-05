@@ -88,9 +88,11 @@ public class FilmService implements FilmorateService<Film> {
     }
 
     public List<Film> findFilmsByDirector(Long directorId, String sortBy) {
+        if (directorStorage.getDirector(directorId) == null) {
+            throw new NotFoundException("Режиссера с данным id не существует");
+        }
         List<Film> films = new ArrayList<>();
         List<Long> filmsId = directorStorage.findFilmsByDirector(directorId, sortBy);
-        if (filmsId.isEmpty()) throw new NotFoundException("");
         for (Long id : filmsId) {
             films.add(getById(id));
         }
