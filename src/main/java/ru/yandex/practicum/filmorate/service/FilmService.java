@@ -49,8 +49,16 @@ public class FilmService implements FilmorateService<Film> {
         likesStorage.deleteLikeOfFilm(filmId, userId);
     }
 
-    public List<Film> getListOfMostPopularFilm(Integer count) {
-        return likesStorage.getListOfMostPopularFilm(count);
+    public List<Film> getListOfMostPopularFilm(Integer count, Integer genreId, Integer year) {
+
+        List<Film> films = new ArrayList<>();
+        List<Long> filmsId = likesStorage.getListOfMostPopularFilm(count, genreId, year);
+
+        for (Long filmId : filmsId) {
+            films.add(getById(filmId));
+        }
+
+        return films;
     }
 
     public List<Film> getCommonFilms(Long id, Long friendId) {

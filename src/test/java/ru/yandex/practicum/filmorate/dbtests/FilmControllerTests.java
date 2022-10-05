@@ -70,7 +70,7 @@ class FilmControllerTests {
         final Film film2 = filmController.create(film);
         final User user1 = userController.create(user);
         filmController.addLikeToFilm(film2.getId(), user1.getId());
-        assertEquals(film2, filmController.getMostPopularFilms(1).stream()
+        assertEquals(film2, filmController.getMostPopularFilms(1,0,0).stream()
                 .findFirst().orElse(null));
     }
 
@@ -82,7 +82,7 @@ class FilmControllerTests {
         filmController.addLikeToFilm(film1.getId(), user1.getId());
         filmController.deleteLikeOfFilm(film1.getId(), user1.getId());
         filmController.addLikeToFilm(film2.getId(), user1.getId());
-        assertEquals(film2, filmController.getMostPopularFilms(1).stream()
+        assertEquals(film2, filmController.getMostPopularFilms(1,0,0).stream()
                 .findFirst().orElse(null));
     }
 
