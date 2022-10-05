@@ -53,6 +53,13 @@ public class FilmService implements FilmorateService<Film> {
         return likesStorage.getListOfMostPopularFilm(count);
     }
 
+    public List<Film> getCommonFilms(Long id, Long friendId) {
+        if (userStorage.getUser(id) == null || userStorage.getUser(friendId) == null) {
+            throw new NotFoundException("Невозможно получить список общих фильмов - пользователя с данным id не существует");
+        }
+        return filmStorage.getCommonFilms(id, friendId);
+    }
+
     @Override
     public List<Film> getAll() {
         return filmStorage.getAll();

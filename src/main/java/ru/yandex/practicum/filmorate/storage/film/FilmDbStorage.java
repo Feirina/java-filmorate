@@ -17,6 +17,7 @@ import javax.validation.Valid;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -101,7 +102,41 @@ public class FilmDbStorage implements FilmStorage{
         }
         return film;
     }
-    
+
+    @Override
+    public List<Film> getRecommendationsFilm(Long id) {
+        List<Film> recommendationFilms = new ArrayList<>();
+        final String sql = "SELECT ul2.user_id FROM user_likes_film AS ul1 " +
+                "JOIN user_likes_film AS ul2 ON ul1.film_id = ul2.film_id " +
+                "WHERE ul1.user_id <> ul2.user_id AND ul1.user_id = ? " +
+                "GROUP BY ul2.user_id ORDER BY COUNT (ul2.film_id) DESC LIMIT 1";
+        final List<Long> sameLikeUser = jdbcTemplate.queryForList(sql, Long.class, id);
+        if (sameLikeUser.size() != 1) {
+            return recommendationFilms;
+        }
+        final String sqlRecommend = "SELECT f.*, m.* FROM film AS f LEFT JOIN user_likes_film AS ulf ON f.id = ulf.film_id " +
+                "LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id " +
+                "WHERE ulf.user_id = ? AND ulf.film_id NOT IN (SELECT film_id FROM user_likes_film WHERE user_id = ?)";
+        recommendationFilms = jdbcTemplate.query(sqlRecommend, (rs, rowNum) -> mappers.makeFilm(rs), sameLikeUser.get(0), id);
+        for (Film film : recommendationFilms) {
+            film.setGenres(loadGenresByFilm(film.getId()));
+        }
+        return recommendationFilms;
+    }
+
+    @Override
+    public List<Film> getCommonFilms(Long id, Long friendId) {
+        final String sql = "SELECT f.*, m.* FROM film AS f LEFT JOIN user_likes_film AS ulf ON f.id = ulf.film_id " +
+                "LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id " +
+                "WHERE ulf.user_id = ? AND ulf.film_id IN (SELECT film_id FROM user_likes_film WHERE user_id = ?)" +
+                " GROUP BY f.id ORDER BY COUNT(ulf.user_id) DESC";
+        List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeFilm(rs), id, friendId);
+        for (Film film : films) {
+            film.setGenres(loadGenresByFilm(film.getId()));
+        }
+        return films;
+    }
+
     private Set<Genre> loadGenresByFilm(Long id) {
         final String sqlGenre = "SELECT * FROM genre AS g LEFT JOIN film_genre AS fg ON g.id = fg.genre_id " +
                 "WHERE fg.film_id = ?";
