@@ -3,9 +3,12 @@ package ru.yandex.practicum.filmorate.storage.likes;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.Mappers;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class LikesDbStorage implements LikesDaoStorage{
@@ -57,6 +60,7 @@ public class LikesDbStorage implements LikesDaoStorage{
                     " GROUP BY f.id ORDER BY COUNT(ulf.user_id) DESC LIMIT ?";
             return jdbcTemplate.query(sql, (rs, rowNum) -> rs.getLong("id"), year, count);
         }
+
     }
 
 }

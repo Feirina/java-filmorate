@@ -85,4 +85,16 @@ class FilmControllerTests {
         assertEquals(film2, filmController.getMostPopularFilms(1,0,0).stream()
                 .findFirst().orElse(null));
     }
+
+    @Test
+    void getCommonFilmsTest() {
+        final Film film1 = filmController.create(film);
+        final Film film2 = filmController.create(film.toBuilder().name("film2").description("new film2").build());
+        final User user1 = userController.create(user);
+        final User user2 = userController.create(user.toBuilder().email("mail@mail").login("login5").build());
+        filmController.addLikeToFilm(film1.getId(), user1.getId());
+        filmController.addLikeToFilm(film2.getId(), user2.getId());
+        filmController.addLikeToFilm(film1.getId(), user2.getId());
+        assertEquals(filmController.getCommonFilms(user1.getId(), user2.getId()).get(0), film1);
+    }
 }
