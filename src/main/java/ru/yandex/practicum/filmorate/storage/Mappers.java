@@ -1,10 +1,7 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -49,5 +46,17 @@ public class Mappers {
                 .id(rs.getLong("mpa_id"))
                 .name(rs.getString("mpa_name"))
                 .build();
+    }
+
+    public Review makeReview(ResultSet rs) throws SQLException {
+        Review review = Review.builder()
+                .reviewId(rs.getLong("id"))
+                .content(rs.getString("content"))
+                .isPositive(rs.getBoolean("is_positive"))
+                .userId(rs.getLong("user_id"))
+                .filmId(rs.getLong("film_id"))
+                .useful(rs.getLong("like_value"))
+                .build();
+        return review;
     }
 }
