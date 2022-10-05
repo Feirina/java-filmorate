@@ -23,7 +23,7 @@ import java.util.Set;
 
 @Slf4j
 @Component("FilmDbStorage")
-public class FilmDbStorage implements FilmStorage{
+public class FilmDbStorage implements FilmStorage {
     private final static LocalDate DATE_OF_FIRST_FILM_RELEASE = LocalDate.of(1895, 12, 28);
     private final JdbcTemplate jdbcTemplate;
     private final Mappers mappers;
@@ -101,14 +101,14 @@ public class FilmDbStorage implements FilmStorage{
         }
         return film;
     }
-    
+
     private Set<Genre> loadGenresByFilm(Long id) {
         final String sqlGenre = "SELECT * FROM genre AS g LEFT JOIN film_genre AS fg ON g.id = fg.genre_id " +
                 "WHERE fg.film_id = ?";
         List<Genre> genres = jdbcTemplate.query(sqlGenre, (res, rowNum) -> mappers.makeGenre(res), id);
         return new HashSet<>(genres);
     }
-    
+
     private void setGenreByFilm(Film film) {
         String sqlUpdateGenre = "DELETE FROM film_genre WHERE film_id = ?";
         jdbcTemplate.update(sqlUpdateGenre, film.getId());
@@ -142,6 +142,48 @@ public class FilmDbStorage implements FilmStorage{
         }
     }
 
+    @Override
+    public List<Film> searchFilmByTitle(String query) {
+        String sqlSearchFilm = "SELECT f.*, m.* FROM film AS f LEFT JOIN mpa AS m ON f.mpa_id=m.mpa_id " +
+                "LEFT JOIN film_directors AS fd ON f.id=fd.film_id LEFT JOIN director AS d ON d.id=fd.director_id " +
+                "LEFT JOIN user_likes_film AS ulf ON f.id=ulf.film_id WHERE f.name iLIKE CONCAT('%', ?, '%') " +
+                "GROUP BY f.id ORDER BY COUNT(ulf.user_id) DESC;";
+        List<Film> films = jdbcTemplate.query(sqlSearchFilm, (rs, rowNum) -> mappers.makeFilm(rs), query);
+        for (Film film : films) {
+            film.setDirectors(loadDirectorsByFilm(film.getId()));
+            film.setGenres(loadGenresByFilm(film.getId()));
+        }
+        return films;
+    }
+
+    @Override
+    public List<Film> searchFilmByDirect(String query) {
+        String sqlSearchFilm = "SELECT f.*, m.* FROM film AS f LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id " +
+                "LEFT JOIN film_directors AS fd ON f.id=fd.film_id LEFT JOIN director AS d ON d.id=fd.director_id " +
+                "LEFT JOIN user_likes_film AS ulf ON f.id=ulf.film_id WHERE d.name iLIKE CONCAT('%', ?, '%') " +
+                "GROUP BY f.id ORDER BY COUNT(ulf.user_id) DESC;";
+        List<Film> films = jdbcTemplate.query(sqlSearchFilm, (rs, rowNum) -> mappers.makeFilm(rs), query);
+        for (Film film : films) {
+            film.setDirectors(loadDirectorsByFilm(film.getId()));
+            film.setGenres(loadGenresByFilm(film.getId()));
+        }
+        return films;
+    }
+
+    @Override
+    public List<Film> searchFilmByTitleAndDirect(String query) {
+        String sqlSearchFilm = "SELECT f.*, m.* FROM film AS f LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id " +
+                "LEFT JOIN film_directors AS fd ON f.id=fd.film_id LEFT JOIN director AS d ON d.id=fd.director_id " +
+                "LEFT JOIN USER_LIKES_FILM AS ulf ON f.id=ulf.film_id WHERE (d.name iLIKE CONCAT('%', ?, '%')) " +
+                "OR (f.name ILIKE CONCAT('%', ?, '%')) GROUP BY f.id ORDER BY COUNT(ulf.user_id) DESC;";
+        List<Film> films = jdbcTemplate.query(sqlSearchFilm, (rs, rowNum) -> mappers.makeFilm(rs), query, query);
+        for (Film film : films) {
+            film.setDirectors(loadDirectorsByFilm(film.getId()));
+            film.setGenres(loadGenresByFilm(film.getId()));
+        }
+        return films;
+    }
+
     public void validation(@Valid @RequestBody Film film) {
         if (film.getName() == null || film.getName().isBlank()) {
             log.error("При попытке создать или обновить фильм произошла ошибка названия фильма");
@@ -159,14 +201,5 @@ public class FilmDbStorage implements FilmStorage{
             log.error("При попытке создать или обновить фильм произошла ошибка продолжительности фильма");
             throw new ValidationException("Продолжительность фильма не может быть отрицательным значением");
         }
-    }
-
-    public List<Film> searchFilmByTitle(String query, List<String> by) {
-        String sql = "Select film.*, mpa.* FROM film " +
-                "LEFT JOIN mpa ON film.mpa_id = mpa.mpa_id " +
-                "LEFT JOIN USER_LIKES_FILM ON film.id=USER_LIKES_FILM.FILM_ID " +
-                "WHERE film.name iLIKE CONCAT('%', ?, '%') " +
-                "GROUP BY film.id ORDER BY COUNT(USER_LIKES_FILM.USER_ID) DESC;";
-            return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeFilm(rs), query);
     }
 }

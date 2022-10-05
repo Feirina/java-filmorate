@@ -10,5 +10,7 @@ public interface FilmStorage {
     void deleteFilm(Long id);
     Film updateFilm(Film film);
     Film getFilm(Long id);
-    List<Film> searchFilmByTitle(String query, List<String> by);
+    List<Film> searchFilmByTitle(String query);
+    List<Film> searchFilmByDirect(String query);
+    List<Film> searchFilmByTitleAndDirect(String query);
 }

@@ -17,7 +17,7 @@ import java.util.Map;
 
 @Component("InMemoryFilmStorage")
 @Slf4j
-public class InMemoryFilmStorage extends Storage<Film> implements FilmStorage{
+public class InMemoryFilmStorage extends Storage<Film> implements FilmStorage {
     ComparatorForFilms comparator = new ComparatorForFilms();
     private final Map<Long, Film> films = new HashMap<>();
     private Long countOfFilmId = 1L;
@@ -75,11 +75,21 @@ public class InMemoryFilmStorage extends Storage<Film> implements FilmStorage{
     }
 
     @Override
-    public List<Film> searchFilmByTitle(String query, List<String> by) {
+    public List<Film> searchFilmByTitle(String query) {
         List<Film> films = getAll();
         films.sort(comparator);
         films.removeIf(film -> !film.getName().contains(query));
         log.info("Количество найденных фильмов: {}", films.size());
-            return new ArrayList<>(films);
+        return new ArrayList<>(films);
+    }
+
+    @Override
+    public List<Film> searchFilmByDirect(String query) {
+        return null;
+    }
+
+    @Override
+    public List<Film> searchFilmByTitleAndDirect(String query) {
+        return null;
     }
 }
