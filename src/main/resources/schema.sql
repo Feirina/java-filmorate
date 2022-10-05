@@ -60,5 +60,3 @@ CREATE TABLE IF NOT EXISTS USER_LIKES_FILM
     FILM_ID BIGINT not null references FILM ON DELETE CASCADE,
     constraint USER_LIKES_FILM_PK primary key (USER_ID, FILM_ID)
 );
-
-
