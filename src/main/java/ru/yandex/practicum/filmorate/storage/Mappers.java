@@ -53,8 +53,8 @@ public class Mappers {
                 .eventId(rs.getLong("event_id"))
                 .entityId(rs.getLong("entity_id"))
                 .userId(rs.getLong("user_id"))
-                .eventType(rs.getString("event_type"))
-                .operation(rs.getString("operation"))
+                .eventType(EventType.valueOf(rs.getString("event_type")))
+                .operation(Operation.valueOf(rs.getString("operation")))
                 .timestamp(rs.getLong("timestamp"))
                 .build();
     }

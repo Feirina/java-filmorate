@@ -1,19 +1,17 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@EqualsAndHashCode(exclude = {"eventId", "timestamp"})
 public class Event {
     private Long eventId;
     private Long entityId;
     private Long userId;
-    private String eventType;
-    private String operation;
+    private EventType eventType;
+    private Operation operation;
     private Long timestamp;
 }
