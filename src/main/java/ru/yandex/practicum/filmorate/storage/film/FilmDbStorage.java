@@ -24,7 +24,7 @@ import java.util.Set;
 
 @Slf4j
 @Component("FilmDbStorage")
-public class FilmDbStorage implements FilmStorage{
+public class FilmDbStorage implements FilmStorage {
     private final static LocalDate DATE_OF_FIRST_FILM_RELEASE = LocalDate.of(1895, 12, 28);
     private final JdbcTemplate jdbcTemplate;
     private final Mappers mappers;
@@ -175,6 +175,48 @@ public class FilmDbStorage implements FilmStorage{
         for (Director director : directors) {
             jdbcTemplate.update(sql, film.getId(), director.getId());
         }
+    }
+
+    @Override
+    public List<Film> searchFilmByTitle(String query) {
+        String sqlSearchFilm = "SELECT f.*, m.* FROM film AS f LEFT JOIN mpa AS m ON f.mpa_id=m.mpa_id " +
+                "LEFT JOIN film_directors AS fd ON f.id=fd.film_id LEFT JOIN director AS d ON d.id=fd.director_id " +
+                "LEFT JOIN user_likes_film AS ulf ON f.id=ulf.film_id WHERE f.name iLIKE CONCAT('%', ?, '%') " +
+                "GROUP BY f.id ORDER BY COUNT(ulf.user_id) DESC;";
+        List<Film> films = jdbcTemplate.query(sqlSearchFilm, (rs, rowNum) -> mappers.makeFilm(rs), query);
+        for (Film film : films) {
+            film.setDirectors(loadDirectorsByFilm(film.getId()));
+            film.setGenres(loadGenresByFilm(film.getId()));
+        }
+        return films;
+    }
+
+    @Override
+    public List<Film> searchFilmByDirect(String query) {
+        String sqlSearchFilm = "SELECT f.*, m.* FROM film AS f LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id " +
+                "LEFT JOIN film_directors AS fd ON f.id=fd.film_id LEFT JOIN director AS d ON d.id=fd.director_id " +
+                "LEFT JOIN user_likes_film AS ulf ON f.id=ulf.film_id WHERE d.name iLIKE CONCAT('%', ?, '%') " +
+                "GROUP BY f.id ORDER BY COUNT(ulf.user_id) DESC;";
+        List<Film> films = jdbcTemplate.query(sqlSearchFilm, (rs, rowNum) -> mappers.makeFilm(rs), query);
+        for (Film film : films) {
+            film.setDirectors(loadDirectorsByFilm(film.getId()));
+            film.setGenres(loadGenresByFilm(film.getId()));
+        }
+        return films;
+    }
+
+    @Override
+    public List<Film> searchFilmByTitleAndDirect(String query) {
+        String sqlSearchFilm = "SELECT f.*, m.* FROM film AS f LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id " +
+                "LEFT JOIN film_directors AS fd ON f.id=fd.film_id LEFT JOIN director AS d ON d.id=fd.director_id " +
+                "LEFT JOIN USER_LIKES_FILM AS ulf ON f.id=ulf.film_id WHERE (d.name iLIKE CONCAT('%', ?, '%')) " +
+                "OR (f.name ILIKE CONCAT('%', ?, '%')) GROUP BY f.id ORDER BY COUNT(ulf.user_id) DESC;";
+        List<Film> films = jdbcTemplate.query(sqlSearchFilm, (rs, rowNum) -> mappers.makeFilm(rs), query, query);
+        for (Film film : films) {
+            film.setDirectors(loadDirectorsByFilm(film.getId()));
+            film.setGenres(loadGenresByFilm(film.getId()));
+        }
+        return films;
     }
 
     public void validation(@Valid @RequestBody Film film) {

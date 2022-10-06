@@ -101,7 +101,6 @@ public class FilmService implements FilmorateService<Film> {
         }
         return film;
     }
-
     public List<Film> findFilmsByDirector(Long directorId, String sortBy) {
         if (directorStorage.getDirector(directorId) == null) {
             throw new NotFoundException("Режиссера с данным id не существует");
@@ -112,6 +111,17 @@ public class FilmService implements FilmorateService<Film> {
             films.add(getById(id));
         }
         return films;
+    }
+
+    public List<Film> searchFilm(String query, List<String> by) {
+        if (by.contains("title") && by.size() == 1) {
+            return filmStorage.searchFilmByTitle(query);
+        } else if (by.contains("director") && by.size() == 1) {
+            return filmStorage.searchFilmByDirect(query);
+        } else if (by.contains("title") && by.contains("director") && by.size() == 2) {
+            return filmStorage.searchFilmByTitleAndDirect(query);
+        }
+        return null;
     }
 
 }

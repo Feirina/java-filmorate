@@ -12,4 +12,7 @@ public interface FilmStorage {
     Film getFilm(Long id);
     List<Film> getRecommendationsFilm(Long id);
     List<Film> getCommonFilms(Long id, Long friendId);
+    List<Film> searchFilmByTitle(String query);
+    List<Film> searchFilmByDirect(String query);
+    List<Film> searchFilmByTitleAndDirect(String query);
 }
