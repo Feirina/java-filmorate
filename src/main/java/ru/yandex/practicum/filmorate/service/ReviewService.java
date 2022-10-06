@@ -62,9 +62,6 @@ public class ReviewService implements FilmorateService<Review> {
     @Override
     public List<Review> getAll() {
         List<Review> reviews = reviewStorage.getAll();
-//        for (Review review : reviews) {
-//            review.setUseful(reviewStorage.setUsefulForReview(review.getReviewId()));
-//        }
         return reviews;
     }
 
@@ -79,15 +76,12 @@ public class ReviewService implements FilmorateService<Review> {
 
     public List<Review> getAllReviewsByFilmId(Long filmId, Integer count) {
         if (filmId == null) {
-            List<Review> reviews = reviewStorage.getAllReviewsByFilmId(filmId, 10);
-            return reviews;
+            return reviewStorage.getAllReviewsByFilmId(filmId, 10);
         }
         if (count == null) {
-            List<Review> reviews = reviewStorage.getAllReviewsByFilmId(filmId, 10);
-            return reviews;
+            return reviewStorage.getAllReviewsByFilmId(filmId, 10);
         }
-        List<Review> reviews = reviewStorage.getAllReviewsByFilmId(filmId, count);
-        return reviews;
+        return reviewStorage.getAllReviewsByFilmId(filmId, count);
     }
 
     public void addLikeToReview(Long id, Long userId) {
