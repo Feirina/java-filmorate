@@ -55,4 +55,15 @@ public class Mappers {
                 .build();
     }
 
+    public Review makeReview(ResultSet rs) throws SQLException {
+        Review review = Review.builder()
+                .reviewId(rs.getLong("id"))
+                .content(rs.getString("content"))
+                .isPositive(rs.getBoolean("is_positive"))
+                .userId(rs.getLong("user_id"))
+                .filmId(rs.getLong("film_id"))
+                .useful(rs.getLong("like_value"))
+                .build();
+        return review;
+    }
 }
