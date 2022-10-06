@@ -64,10 +64,9 @@ public class ReviewDbStorage implements ReviewDaoStorage {
     public Review getReview(Long id) {
         final String sql = "SELECT r.*, rl.like_value FROM reviews AS r LEFT JOIN reviews_likes " +
                 "AS rl ON r.id = rl.review_id WHERE r.id = ?";
-        Review review = jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeReview(rs), id)
+        return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeReview(rs), id)
                 .stream()
                 .findAny().orElse(null);
-        return review;
     }
 
     @Override

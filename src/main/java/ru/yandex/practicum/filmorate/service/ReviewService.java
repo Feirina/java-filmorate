@@ -20,7 +20,6 @@ import java.util.List;
 public class ReviewService implements FilmorateService<Review> {
     private final ReviewDaoStorage reviewStorage;
     private final UserStorage userStorage;
-
     private final FilmStorage filmStorage;
 
     @Autowired
@@ -61,8 +60,7 @@ public class ReviewService implements FilmorateService<Review> {
 
     @Override
     public List<Review> getAll() {
-        List<Review> reviews = reviewStorage.getAll();
-        return reviews;
+        return reviewStorage.getAll();
     }
 
     @Override
