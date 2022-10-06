@@ -49,6 +49,16 @@ public class InMemoryFilmStorage extends Storage<Film> implements FilmStorage {
     }
 
     @Override
+    public List<Film> getRecommendationsFilm(Long id) {
+        return null;
+    }
+
+    @Override
+    public List<Film> getCommonFilms(Long id, Long friendId) {
+        return null;
+    }
+
+    @Override
     public void validation(@Valid @RequestBody Film film) {
         if (film.getName() == null || film.getName().isBlank()) {
             log.error("При попытке создать или обновить фильм произошла ошибка названия фильма");

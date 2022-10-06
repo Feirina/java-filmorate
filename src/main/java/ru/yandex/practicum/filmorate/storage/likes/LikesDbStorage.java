@@ -3,9 +3,12 @@ package ru.yandex.practicum.filmorate.storage.likes;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.Mappers;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class LikesDbStorage implements LikesDaoStorage{
@@ -30,10 +33,34 @@ public class LikesDbStorage implements LikesDaoStorage{
     }
 
     @Override
-    public List<Film> getListOfMostPopularFilm(Integer count) {
-        final String sql = "SELECT f.*, m.* FROM film AS f LEFT JOIN user_likes_film AS ulf ON f.id = ulf.film_id " +
-                "LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id" +
-                " GROUP BY f.id ORDER BY COUNT(ulf.user_id) DESC LIMIT ?";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeFilm(rs), count);
+    public List<Long> getListOfMostPopularFilm(Integer count, Integer genreId, Integer year) {
+        if (genreId == 0 && year == 0) {
+            String sql = "SELECT f.id, COUNT(ulf.user_id) as l FROM film AS f " +
+                    " LEFT JOIN user_likes_film AS ulf ON f.id = ulf.film_id " +
+                    " GROUP BY f.id ORDER BY COUNT(ulf.user_id) DESC LIMIT ?";
+            return jdbcTemplate.query(sql, (rs, rowNum) -> rs.getLong("id"), count);
+        } else if (genreId != 0 && year != 0) {
+            String sql = "SELECT f.id, COUNT(ulf.user_id) as l FROM film AS f " +
+                    " LEFT JOIN user_likes_film AS ulf ON f.id = ulf.film_id " +
+                    " INNER JOIN film_genre as fg ON f.id = fg.film_id " +
+                    " AND fg.genre_id = ? AND YEAR(f.release_date) = ? " +
+                    " GROUP BY f.id ORDER BY COUNT(ulf.user_id) DESC LIMIT ?";
+            return jdbcTemplate.query(sql, (rs, rowNum) -> rs.getLong("id"), genreId, year, count);
+        } else if (genreId != 0) {
+            String sql = "SELECT f.id, COUNT(ulf.user_id) as l FROM film AS f " +
+                    " LEFT JOIN user_likes_film AS ulf ON f.id = ulf.film_id " +
+                    " INNER JOIN film_genre as fg ON f.id = fg.film_id " +
+                    " AND fg.genre_id = ? " +
+                    " GROUP BY f.id ORDER BY COUNT(ulf.user_id) DESC LIMIT ?";
+            return jdbcTemplate.query(sql, (rs, rowNum) -> rs.getLong("id"), genreId, count);
+        } else {
+            String sql = "SELECT f.id, COUNT(ulf.user_id) as l FROM film AS f " +
+                    " LEFT JOIN user_likes_film AS ulf ON f.id = ulf.film_id " +
+                    " WHERE YEAR(f.release_date) = ? " +
+                    " GROUP BY f.id ORDER BY COUNT(ulf.user_id) DESC LIMIT ?";
+            return jdbcTemplate.query(sql, (rs, rowNum) -> rs.getLong("id"), year, count);
+        }
+
     }
+
 }

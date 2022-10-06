@@ -49,8 +49,23 @@ public class FilmService implements FilmorateService<Film> {
         likesStorage.deleteLikeOfFilm(filmId, userId);
     }
 
-    public List<Film> getListOfMostPopularFilm(Integer count) {
-        return likesStorage.getListOfMostPopularFilm(count);
+    public List<Film> getListOfMostPopularFilm(Integer count, Integer genreId, Integer year) {
+
+        List<Film> films = new ArrayList<>();
+        List<Long> filmsId = likesStorage.getListOfMostPopularFilm(count, genreId, year);
+
+        for (Long filmId : filmsId) {
+            films.add(getById(filmId));
+        }
+
+        return films;
+    }
+
+    public List<Film> getCommonFilms(Long id, Long friendId) {
+        if (userStorage.getUser(id) == null || userStorage.getUser(friendId) == null) {
+            throw new NotFoundException("Невозможно получить список общих фильмов - пользователя с данным id не существует");
+        }
+        return filmStorage.getCommonFilms(id, friendId);
     }
 
     @Override
