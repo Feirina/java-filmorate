@@ -59,4 +59,11 @@ public class Mappers {
                 .build();
         return review;
     }
+
+    public Director makeDirector(ResultSet rs) throws SQLException {
+        return Director.builder()
+                .id(rs.getLong("id"))
+                .name(rs.getString("name"))
+                .build();
+    }
 }
