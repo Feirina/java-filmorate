@@ -50,6 +50,7 @@ class ReviewControllerTests {
             .isPositive(true)
             .userId(1L)
             .filmId(1L)
+            .useful(0L)
             .build();
 
     @Test
