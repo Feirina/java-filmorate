@@ -4,11 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Event;
-import ru.yandex.practicum.filmorate.model.EventType;
-import ru.yandex.practicum.filmorate.model.Operation;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.event.EventDaoStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.friends.FriendsDaoStorage;
@@ -27,7 +23,7 @@ public class UserService implements FilmorateService<User> {
     @Autowired
     public UserService(@Qualifier("UserDbStorage") UserStorage userStorage,
                        FriendsDaoStorage friendsStorage,
-                       @Qualifier("FilmDbStorage") FilmStorage filmStorage),
+                       @Qualifier("FilmDbStorage") FilmStorage filmStorage,
                        EventDaoStorage eventStorage) {
         this.userStorage = userStorage;
         this.friendsStorage = friendsStorage;
