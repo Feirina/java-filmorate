@@ -53,7 +53,8 @@ public class ReviewService implements FilmorateService<Review> {
 
     public Review updateReview(Review review) {
         validation(review);
-        if (reviewStorage.getReview(review.getReviewId()) == null) {
+        Review foundReview = reviewStorage.getReview(review.getReviewId());
+        if (foundReview == null) {
             throw new NotFoundException("Отзыва с данным id не существует");
         }
         Review updatedReview = reviewStorage.updateReview(review);
@@ -100,7 +101,6 @@ public class ReviewService implements FilmorateService<Review> {
         } else if (userStorage.getUser(userId) == null) {
             throw new NotFoundException("Невозможно добавить лайк пользователя с данным id не существует");
         }
-        eventStorage.fixEvent(userId, id, EventType.REVIEW, Operation.UPDATE);
         reviewStorage.addLikeToReview(id, userId);
     }
 
@@ -110,7 +110,6 @@ public class ReviewService implements FilmorateService<Review> {
         } else if (userStorage.getUser(userId) == null) {
             throw new NotFoundException("Невозможно добавить дизлайк пользователя с данным id не существует");
         }
-        eventStorage.fixEvent(userId, id, EventType.REVIEW, Operation.UPDATE);
         reviewStorage.addDislikeToReview(id, userId);
     }
 
@@ -120,7 +119,6 @@ public class ReviewService implements FilmorateService<Review> {
         } else if (userStorage.getUser(userId) == null) {
             throw new NotFoundException("Невозможно удалить лайк пользователя с данным id не существует");
         }
-        eventStorage.fixEvent(userId, id, EventType.REVIEW, Operation.UPDATE);
         reviewStorage.deleteLikeOfReview(id, userId);
     }
 
@@ -130,7 +128,6 @@ public class ReviewService implements FilmorateService<Review> {
         } else if (userStorage.getUser(userId) == null) {
             throw new NotFoundException("Невозможно удалить дизлайк пользователя с данным id не существует");
         }
-        eventStorage.fixEvent(userId, id, EventType.REVIEW, Operation.UPDATE);
         reviewStorage.deleteDislikeOfReview(id, userId);
     }
 
