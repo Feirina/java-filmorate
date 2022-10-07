@@ -77,10 +77,9 @@ class ReviewControllerTests {
         final Film film1 = filmController.create(film);
         final User user1 = userController.create(user);
         final Review review1 = reviewController.create(review);
-        assertEquals(review1, reviewController.getReview(review1.getReviewId()));
-        List<Review> reviews = reviewController.getAllReview(null, null);
         reviewController.deleteReview(review1.getReviewId());
-        assertEquals(reviews.size() - 1, filmController.getAll().size());
+        List<Review> reviews = reviewController.getAllReview(null, null);
+        assertEquals(0, reviews.size());
     }
 
     @Test
