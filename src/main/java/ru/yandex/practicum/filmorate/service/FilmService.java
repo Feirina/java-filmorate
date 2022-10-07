@@ -8,10 +8,12 @@ import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Operation;
 import ru.yandex.practicum.filmorate.storage.event.EventDaoStorage;
+import ru.yandex.practicum.filmorate.storage.director.DirectorDaoStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.likes.LikesDaoStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -19,15 +21,19 @@ public class FilmService implements FilmorateService<Film> {
     private final FilmStorage filmStorage;
     private final LikesDaoStorage likesStorage;
     private final UserStorage userStorage;
+    private final DirectorDaoStorage directorStorage;
     private final EventDaoStorage eventStorage;
 
     @Autowired
-    public FilmService(@Qualifier("FilmDbStorage") FilmStorage filmStorage, LikesDaoStorage likesStorage,
+    public FilmService(@Qualifier("FilmDbStorage") FilmStorage filmStorage,
+                       LikesDaoStorage likesStorage,
                        @Qualifier("UserDbStorage") UserStorage userStorage,
+                       DirectorDaoStorage directorStorage,
                        EventDaoStorage eventStorage) {
         this.filmStorage = filmStorage;
         this.likesStorage = likesStorage;
         this.userStorage = userStorage;
+        this.directorStorage = directorStorage;
         this.eventStorage = eventStorage;
     }
 
@@ -51,8 +57,23 @@ public class FilmService implements FilmorateService<Film> {
         eventStorage.fixEvent(userId, filmId, EventType.LIKE, Operation.REMOVE);
     }
 
-    public List<Film> getListOfMostPopularFilm(Integer count) {
-        return likesStorage.getListOfMostPopularFilm(count);
+    public List<Film> getListOfMostPopularFilm(Integer count, Integer genreId, Integer year) {
+
+        List<Film> films = new ArrayList<>();
+        List<Long> filmsId = likesStorage.getListOfMostPopularFilm(count, genreId, year);
+
+        for (Long filmId : filmsId) {
+            films.add(getById(filmId));
+        }
+
+        return films;
+    }
+
+    public List<Film> getCommonFilms(Long id, Long friendId) {
+        if (userStorage.getUser(id) == null || userStorage.getUser(friendId) == null) {
+            throw new NotFoundException("Невозможно получить список общих фильмов - пользователя с данным id не существует");
+        }
+        return filmStorage.getCommonFilms(id, friendId);
     }
 
     @Override
@@ -61,7 +82,8 @@ public class FilmService implements FilmorateService<Film> {
     }
 
     public Film createFilm(Film film) {
-        return filmStorage.createFilm(film);
+        Film createdFilm = filmStorage.createFilm(film);
+        return getById(createdFilm.getId());
     }
 
     public void deleteFilm(Long id) {
@@ -75,7 +97,8 @@ public class FilmService implements FilmorateService<Film> {
         if (filmStorage.getFilm(film.getId()) == null) {
             throw new NotFoundException("Фильма с данным id не существует");
         }
-        return filmStorage.updateFilm(film);
+        Film updatedFilm = filmStorage.updateFilm(film);
+        return getById(updatedFilm.getId());
     }
 
     @Override
@@ -86,4 +109,27 @@ public class FilmService implements FilmorateService<Film> {
         }
         return film;
     }
+    public List<Film> findFilmsByDirector(Long directorId, String sortBy) {
+        if (directorStorage.getDirector(directorId) == null) {
+            throw new NotFoundException("Режиссера с данным id не существует");
+        }
+        List<Film> films = new ArrayList<>();
+        List<Long> filmsId = directorStorage.findFilmsByDirector(directorId, sortBy);
+        for (Long id : filmsId) {
+            films.add(getById(id));
+        }
+        return films;
+    }
+
+    public List<Film> searchFilm(String query, List<String> by) {
+        if (by.contains("title") && by.size() == 1) {
+            return filmStorage.searchFilmByTitle(query);
+        } else if (by.contains("director") && by.size() == 1) {
+            return filmStorage.searchFilmByDirect(query);
+        } else if (by.contains("title") && by.contains("director") && by.size() == 2) {
+            return filmStorage.searchFilmByTitleAndDirect(query);
+        }
+        return null;
+    }
+
 }

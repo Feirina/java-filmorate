@@ -6,10 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.Operation;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -25,6 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class UserControllerTests {
     @Autowired
     private UserController userController;
+    @Autowired
+    private FilmController filmController;
     final private User user = User.builder()
             .email("email@co")
             .login("login")
@@ -36,6 +41,13 @@ class UserControllerTests {
             .login("login")
             .name("name")
             .birthday(LocalDate.of(2000, 4, 15))
+            .build();
+    final private Film film = Film.builder()
+            .name("name")
+            .description("new Film")
+            .duration(130)
+            .releaseDate(LocalDate.of(2002, 5, 20))
+            .mpa(Mpa.builder().id(1L).name("G").build())
             .build();
 
     @Test
@@ -128,5 +140,22 @@ class UserControllerTests {
         userController.addUserToFriends(user3.getId(), user4.getId());
         userController.deleteUserFromFriends(user3.getId(), user4.getId());
         assertEquals(List.of(addEvent, removeEvent), userController.getFeed(1L));
+    }
+
+    @Test
+    void getRecommendationsFilmTest() {
+        final User user3 = userController.create(user);
+        final User user4 = userController.create(user2);
+        final User user5 = userController.create(user2.toBuilder().email("mail@mail").login("login5").build());
+        final Film film1 = filmController.create(film);
+        final Film film2 = filmController.create(film.toBuilder().name("film2Name").build());
+        final Film film3 = filmController.create(film.toBuilder().name("film3Name").build());
+        filmController.addLikeToFilm(film1.getId(), user3.getId());
+        filmController.addLikeToFilm(film2.getId(), user3.getId());
+        filmController.addLikeToFilm(film3.getId(), user3.getId());
+        filmController.addLikeToFilm(film1.getId(), user4.getId());
+        filmController.addLikeToFilm(film2.getId(), user4.getId());
+        filmController.addLikeToFilm(film1.getId(), user5.getId());
+        assertEquals(List.of(film2, film3), userController.getRecommendationsFilm(user5.getId()));
     }
 }

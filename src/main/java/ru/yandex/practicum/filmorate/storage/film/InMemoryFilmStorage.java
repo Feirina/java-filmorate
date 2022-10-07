@@ -9,12 +9,15 @@ import ru.yandex.practicum.filmorate.storage.Storage;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component("InMemoryFilmStorage")
 @Slf4j
-public class InMemoryFilmStorage extends Storage<Film> implements FilmStorage{
+public class InMemoryFilmStorage extends Storage<Film> implements FilmStorage {
+    ComparatorForFilms comparator = new ComparatorForFilms();
     private final Map<Long, Film> films = new HashMap<>();
     private Long countOfFilmId = 1L;
     private static final LocalDate DATE_OF_FIRST_FILM_RELEASE = LocalDate.of(1895, 12, 28);
@@ -46,6 +49,16 @@ public class InMemoryFilmStorage extends Storage<Film> implements FilmStorage{
     }
 
     @Override
+    public List<Film> getRecommendationsFilm(Long id) {
+        return null;
+    }
+
+    @Override
+    public List<Film> getCommonFilms(Long id, Long friendId) {
+        return null;
+    }
+
+    @Override
     public void validation(@Valid @RequestBody Film film) {
         if (film.getName() == null || film.getName().isBlank()) {
             log.error("При попытке создать или обновить фильм произошла ошибка названия фильма");
@@ -68,5 +81,24 @@ public class InMemoryFilmStorage extends Storage<Film> implements FilmStorage{
             countOfFilmId++;
         }
         films.put(film.getId(), film);
+    }
+
+    @Override
+    public List<Film> searchFilmByTitle(String query) {
+        List<Film> films = getAll();
+        films.sort(comparator);
+        films.removeIf(film -> !film.getName().contains(query));
+        log.info("Количество найденных фильмов: {}", films.size());
+        return new ArrayList<>(films);
+    }
+
+    @Override
+    public List<Film> searchFilmByDirect(String query) {
+        return null;
+    }
+
+    @Override
+    public List<Film> searchFilmByTitleAndDirect(String query) {
+        return null;
     }
 }
