@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.event;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Event;
@@ -10,6 +11,7 @@ import ru.yandex.practicum.filmorate.storage.Mappers;
 import java.time.Instant;
 import java.util.List;
 
+@Slf4j
 @Component
 public class EventDbStorage implements EventDaoStorage {
     private final JdbcTemplate jdbcTemplate;
