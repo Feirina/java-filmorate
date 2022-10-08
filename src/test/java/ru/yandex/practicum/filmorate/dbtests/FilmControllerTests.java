@@ -111,7 +111,7 @@ class FilmControllerTests {
         findFilms = filmController.searchFilm("name", List.of("title"));
         assertEquals(1, findFilms.size());
         assertEquals(film.getName(), findFilms.get(0).getName());
-        assertNull(filmController.searchFilm("i", List.of("zero")));
+        assertEquals(new ArrayList<>(), filmController.searchFilm("i", List.of("zero")));
         findFilms = filmController.searchFilm("Test", List.of("director"));
         assertEquals(1, findFilms.size());
         assertEquals("title", findFilms.get(0).getName());
