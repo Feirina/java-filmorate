@@ -4,7 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.Mappers;
 
@@ -15,6 +15,7 @@ import java.util.List;
 @Component
 public class ReviewDbStorage implements ReviewDaoStorage {
     private final JdbcTemplate jdbcTemplate;
+
     private final Mappers mappers;
 
     public ReviewDbStorage(JdbcTemplate jdbcTemplate, Mappers mappers) {

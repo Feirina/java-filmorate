@@ -5,18 +5,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.Mappers;
 
-import javax.validation.Valid;
 import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -25,8 +21,9 @@ import java.util.Set;
 @Slf4j
 @Component("FilmDbStorage")
 public class FilmDbStorage implements FilmStorage {
-    private static final LocalDate DATE_OF_FIRST_FILM_RELEASE = LocalDate.of(1895, 12, 28);
+
     private final JdbcTemplate jdbcTemplate;
+
     private final Mappers mappers;
 
     public FilmDbStorage(JdbcTemplate jdbcTemplate, Mappers mappers) {
@@ -47,7 +44,6 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film createFilm(Film film) {
-        validation(film);
         if (film == null) {
             throw new NotFoundException("Невозможно создать фильм. Передано пустое значение фильма.");
         }
@@ -80,7 +76,6 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
-        validation(film);
         final String sql = "UPDATE film SET name = ?, description = ?, duration = ?, release_date = ?, " +
                 "MPA_ID = ? WHERE id = ?";
         jdbcTemplate.update(sql, film.getName(), film.getDescription(), film.getDuration(), film.getReleaseDate(),
@@ -217,24 +212,5 @@ public class FilmDbStorage implements FilmStorage {
             film.setGenres(loadGenresByFilm(film.getId()));
         }
         return films;
-    }
-
-    public void validation(@Valid @RequestBody Film film) {
-        if (film.getName() == null || film.getName().isBlank()) {
-            log.error("При попытке создать или обновить фильм произошла ошибка названия фильма");
-            throw new ValidationException("Название фильма не может быть пустым");
-        }
-        if (film.getDescription().length() > 200) {
-            log.error("При попытке создать или обновить фильм произошла ошибка описания фильма");
-            throw new ValidationException("Длина описания фильма не может превышать 200 символов");
-        }
-        if (film.getReleaseDate().isBefore(DATE_OF_FIRST_FILM_RELEASE)) {
-            log.error("При попытке создать или обновить фильм произошла ошибка даты релиза фильма");
-            throw new ValidationException("Дата релиза фильма не может быть раньше 28.12.1895");
-        }
-        if (film.getDuration() < 0) {
-            log.error("При попытке создать или обновить фильм произошла ошибка продолжительности фильма");
-            throw new ValidationException("Продолжительность фильма не может быть отрицательным значением");
-        }
     }
 }

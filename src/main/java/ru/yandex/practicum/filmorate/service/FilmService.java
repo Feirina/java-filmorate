@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Operation;
@@ -20,9 +20,13 @@ import java.util.List;
 @Service
 public class FilmService implements FilmorateService<Film> {
     private final FilmStorage filmStorage;
+
     private final LikesDaoStorage likesStorage;
+
     private final UserStorage userStorage;
+
     private final DirectorDaoStorage directorStorage;
+
     private final EventDaoStorage eventStorage;
 
     @Autowired
@@ -59,14 +63,11 @@ public class FilmService implements FilmorateService<Film> {
     }
 
     public List<Film> getListOfMostPopularFilm(Integer count, Integer genreId, Integer year) {
-
         List<Film> films = new ArrayList<>();
         List<Long> filmsId = likesStorage.getListOfMostPopularFilm(count, genreId, year);
-
         for (Long filmId : filmsId) {
             films.add(getById(filmId));
         }
-
         return films;
     }
 
@@ -110,6 +111,7 @@ public class FilmService implements FilmorateService<Film> {
         }
         return film;
     }
+
     public List<Film> findFilmsByDirector(Long directorId, String sortBy) {
         if (directorStorage.getDirector(directorId) == null) {
             throw new NotFoundException("Режиссера с данным id не существует");

@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.director.DirectorDaoStorage;
 
@@ -9,7 +9,6 @@ import java.util.List;
 
 @Service
 public class DirectorService implements FilmorateService<Director> {
-
     private final DirectorDaoStorage directorStorage;
 
     public DirectorService(DirectorDaoStorage directorStorage) {

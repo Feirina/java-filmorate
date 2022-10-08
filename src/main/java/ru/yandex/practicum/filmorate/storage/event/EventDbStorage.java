@@ -15,6 +15,7 @@ import java.util.List;
 @Component
 public class EventDbStorage implements EventDaoStorage {
     private final JdbcTemplate jdbcTemplate;
+
     private final Mappers mappers;
 
     public EventDbStorage(JdbcTemplate jdbcTemplate, Mappers mappers) {

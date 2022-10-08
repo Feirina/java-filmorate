@@ -10,6 +10,7 @@ import java.util.List;
 @Component
 public class FriendsDbStorage implements FriendsDaoStorage{
     private final JdbcTemplate jdbcTemplate;
+
     private final Mappers mappers;
 
     public FriendsDbStorage(JdbcTemplate jdbcTemplate, Mappers mappers) {

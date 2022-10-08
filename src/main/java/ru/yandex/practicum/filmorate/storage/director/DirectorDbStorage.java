@@ -4,13 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.Mappers;
 
-import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,8 +16,8 @@ import java.util.Map;
 @Slf4j
 @Component
 public class DirectorDbStorage implements DirectorDaoStorage {
-
     private final JdbcTemplate jdbcTemplate;
+
     private final Mappers mappers;
 
     public DirectorDbStorage(JdbcTemplate jdbcTemplate, Mappers mappers) {
@@ -36,7 +33,6 @@ public class DirectorDbStorage implements DirectorDaoStorage {
 
     @Override
     public Director createDirector(Director director) {
-        validation(director);
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("director")
                 .usingGeneratedKeyColumns("id");
@@ -54,7 +50,6 @@ public class DirectorDbStorage implements DirectorDaoStorage {
 
     @Override
     public Director updateDirector(Director director) {
-        validation(director);
         String sql = "UPDATE director SET name = ? WHERE id = ?";
         jdbcTemplate.update(sql, director.getName(), director.getId());
         return director;
@@ -79,7 +74,6 @@ public class DirectorDbStorage implements DirectorDaoStorage {
         String sqlByYear = "SELECT f.id AS film_id FROM film AS f " +
                 "INNER JOIN film_directors AS fd ON f.id = fd.film_id AND fd.director_id = ? " +
                 "ORDER BY f.release_date";
-        List<Film> films = new ArrayList<>();
         if (sortBy.equals("year")) {
             return jdbcTemplate.query(sqlByYear,
                     (rs, rowNum) -> rs.getLong("film_id"), directorId);
@@ -88,12 +82,4 @@ public class DirectorDbStorage implements DirectorDaoStorage {
                     (rs, rowNum) -> rs.getLong("film_id"), directorId);
         }
     }
-
-    public void validation(@Valid @RequestBody Director director) {
-        if (director.getName() == null || director.getName().isBlank()) {
-            log.error("При попытке создать или обновить режиссера произошла ошибка имени режиссера");
-            throw new ValidationException("Имя режиссера не может быть пустым");
-        }
-    }
-
 }

@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.event.EventDaoStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -15,8 +15,11 @@ import java.util.List;
 @Service
 public class UserService implements FilmorateService<User> {
     private final UserStorage userStorage;
+
     private final FriendsDaoStorage friendsStorage;
+
     private final EventDaoStorage eventStorage;
+
     private final FilmStorage filmStorage;
 
 
@@ -67,6 +70,7 @@ public class UserService implements FilmorateService<User> {
     }
 
     public User createUser(User user) {
+        userNameValidation(user);
         return userStorage.createUser(user);
     }
 
@@ -81,6 +85,7 @@ public class UserService implements FilmorateService<User> {
         if (userStorage.getUser(user.getId()) == null) {
             throw new NotFoundException("Пользователя с данным id не существует");
         }
+        userNameValidation(user);
         return userStorage.updateUser(user);
     }
 
@@ -102,5 +107,11 @@ public class UserService implements FilmorateService<User> {
             throw new NotFoundException("Пользователя с данным id не существует");
         }
         return filmStorage.getRecommendationsFilm(id);
+    }
+
+    private void userNameValidation(User user) {
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
     }
 }

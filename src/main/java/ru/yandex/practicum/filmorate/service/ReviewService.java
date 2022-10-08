@@ -4,9 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.Operation;
 import ru.yandex.practicum.filmorate.model.Review;
@@ -15,15 +13,17 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.review.ReviewDaoStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @Slf4j
 @Service
 public class ReviewService implements FilmorateService<Review> {
     private final ReviewDaoStorage reviewStorage;
+
     private final UserStorage userStorage;
+
     private final FilmStorage filmStorage;
+
     private final EventDbStorage eventStorage;
 
     @Autowired
@@ -38,7 +38,6 @@ public class ReviewService implements FilmorateService<Review> {
     }
 
     public Review addReview(Review review) {
-        validation(review);
         if (review.getUserId() <= 0 || userStorage.getUser(review.getUserId()) == null) {
             throw new NotFoundException("Невозможно добавить отзыв, " +
                     "пользователя с данным id не существует");
@@ -52,7 +51,6 @@ public class ReviewService implements FilmorateService<Review> {
     }
 
     public Review updateReview(Review review) {
-        validation(review);
         Review foundReview = reviewStorage.getReview(review.getReviewId());
         if (foundReview == null) {
             throw new NotFoundException("Отзыва с данным id не существует");
@@ -129,24 +127,5 @@ public class ReviewService implements FilmorateService<Review> {
             throw new NotFoundException("Невозможно удалить дизлайк пользователя с данным id не существует");
         }
         reviewStorage.deleteDislikeOfReview(id, userId);
-    }
-
-    public void validation(@Valid @RequestBody Review review) {
-        if (review.getUserId() == null) {
-            log.error("При попытке создать или обновить отзыв произошла ошибка id пользователя");
-            throw new ValidationException("Id пользователя не может быть пустым");
-        }
-        if (review.getFilmId() == null) {
-            log.error("При попытке создать или обновить отзыв произошла ошибка id фильма");
-            throw new ValidationException("Id фильма не может быть пустым");
-        }
-        if (review.getContent() == null || review.getContent().isBlank()) {
-            log.error("При попытке создать или обновить отзыв произошла ошибка содержания отзыва");
-            throw new ValidationException("Содержание отзыва не может быть пустым");
-        }
-        if (review.getIsPositive() == null) {
-            log.error("При попытке создать или обновить отзыв произошла ошибка ценки отзыва");
-            throw new ValidationException("Содержание оценки отзыва не может быть пустым");
-        }
     }
 }

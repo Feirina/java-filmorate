@@ -53,7 +53,5 @@ public class LikesDbStorage implements LikesDaoStorage{
                     " GROUP BY f.id ORDER BY COUNT(ulf.user_id) DESC LIMIT ?";
             return jdbcTemplate.query(sql, (rs, rowNum) -> rs.getLong("id"), year, count);
         }
-
     }
-
 }

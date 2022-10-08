@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.exception.BadRequestException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.Storage;
 
@@ -18,8 +18,11 @@ import java.util.Map;
 @Slf4j
 public class InMemoryFilmStorage extends Storage<Film> implements FilmStorage {
     ComparatorForFilms comparator = new ComparatorForFilms();
+
     private final Map<Long, Film> films = new HashMap<>();
+
     private Long countOfFilmId = 1L;
+
     private static final LocalDate DATE_OF_FIRST_FILM_RELEASE = LocalDate.of(1895, 12, 28);
 
     @Override
@@ -62,19 +65,19 @@ public class InMemoryFilmStorage extends Storage<Film> implements FilmStorage {
     public void validation(@Valid @RequestBody Film film) {
         if (film.getName() == null || film.getName().isBlank()) {
             log.error("При попытке создать или обновить фильм произошла ошибка названия фильма");
-            throw new ValidationException("Название фильма не может быть пустым");
+            throw new BadRequestException("Название фильма не может быть пустым");
         }
         if (film.getDescription().length() > 200) {
             log.error("При попытке создать или обновить фильм произошла ошибка описания фильма");
-            throw new ValidationException("Длина описания фильма не может превышать 200 символов");
+            throw new BadRequestException("Длина описания фильма не может превышать 200 символов");
         }
         if (film.getReleaseDate().isBefore(DATE_OF_FIRST_FILM_RELEASE)) {
             log.error("При попытке создать или обновить фильм произошла ошибка даты релиза фильма");
-            throw new ValidationException("Дата релиза фильма не может быть раньше 28.12.1895");
+            throw new BadRequestException("Дата релиза фильма не может быть раньше 28.12.1895");
         }
         if (film.getDuration() < 0) {
             log.error("При попытке создать или обновить фильм произошла ошибка продолжительности фильма");
-            throw new ValidationException("Продолжительность фильма не может быть отрицательным значением");
+            throw new BadRequestException("Продолжительность фильма не может быть отрицательным значением");
         }
         if (film.getId() == null || film.getId() == 0) {
             film.setId(countOfFilmId);

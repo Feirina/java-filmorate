@@ -10,6 +10,7 @@ import java.util.List;
 @Component
 public class MpaDbStorage implements MpaDaoStorage {
     private final JdbcTemplate jdbcTemplate;
+
     private final Mappers mappers;
 
     public MpaDbStorage(JdbcTemplate jdbcTemplate, Mappers mappers) {

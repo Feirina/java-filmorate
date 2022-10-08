@@ -10,6 +10,7 @@ import java.util.List;
 @Component
 public class GenreDbStorage implements GenreDaoStorage {
     private final JdbcTemplate jdbcTemplate;
+
     private final Mappers mappers;
 
     public GenreDbStorage(JdbcTemplate jdbcTemplate, Mappers mappers) {
