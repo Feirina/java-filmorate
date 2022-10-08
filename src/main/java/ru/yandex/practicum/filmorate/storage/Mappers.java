@@ -67,4 +67,16 @@ public class Mappers {
         return review;
     }
 
+    public Event makeEvent(ResultSet rs) throws SQLException {
+        return Event.builder()
+                .eventId(rs.getLong("event_id"))
+                .entityId(rs.getLong("entity_id"))
+                .userId(rs.getLong("user_id"))
+                .eventType(EventType.valueOf(rs.getString("event_type")))
+                .operation(Operation.valueOf(rs.getString("operation")))
+                .timestamp(rs.getLong("timestamp"))
+                .build();
+    }
+
 }
+

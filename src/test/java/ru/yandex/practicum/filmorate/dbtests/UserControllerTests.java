@@ -8,6 +8,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.controller.UserController;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.EventType;
+import ru.yandex.practicum.filmorate.model.Operation;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
@@ -102,6 +105,41 @@ class UserControllerTests {
         userController.addUserToFriends(user5.getId(), user3.getId());
         userController.addUserToFriends(user5.getId(), user4.getId());
         assertEquals(List.of(user3), userController.getListOfMutualFriends(user4.getId(), user5.getId()));
+    }
+
+    @Test
+    void friendAddGetFeedTest() {
+        final User user3 = userController.create(user);
+        final User user4 = userController.create(user2);
+        final Event testEvent = Event.builder()
+                .eventType(EventType.FRIEND)
+                .operation(Operation.ADD)
+                .entityId(2L)
+                .userId(1L)
+                .build();
+        userController.addUserToFriends(user3.getId(), user4.getId());
+        assertEquals(List.of(testEvent), userController.getFeed(1L));
+    }
+
+    @Test
+    void friendRemoveGetFeedTest() {
+        final User user3 = userController.create(user);
+        final User user4 = userController.create(user2);
+        final Event addEvent = Event.builder()
+                .eventType(EventType.FRIEND)
+                .operation(Operation.ADD)
+                .entityId(2L)
+                .userId(1L)
+                .build();
+        final Event removeEvent = Event.builder()
+                .eventType(EventType.FRIEND)
+                .operation(Operation.REMOVE)
+                .entityId(2L)
+                .userId(1L)
+                .build();
+        userController.addUserToFriends(user3.getId(), user4.getId());
+        userController.deleteUserFromFriends(user3.getId(), user4.getId());
+        assertEquals(List.of(addEvent, removeEvent), userController.getFeed(1L));
     }
 
     @Test

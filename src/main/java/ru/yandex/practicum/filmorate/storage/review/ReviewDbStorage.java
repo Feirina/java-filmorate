@@ -51,7 +51,7 @@ public class ReviewDbStorage implements ReviewDaoStorage {
                 "WHERE id = ?";
         jdbcTemplate.update(sql, review.getContent(), review.getIsPositive(),
                 review.getReviewId());
-        return review;
+        return getReview(review.getReviewId());
     }
 
     @Override

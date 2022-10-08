@@ -7,7 +7,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.EventType;
+import ru.yandex.practicum.filmorate.model.Operation;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.storage.event.EventDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.review.ReviewDaoStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -21,14 +24,17 @@ public class ReviewService implements FilmorateService<Review> {
     private final ReviewDaoStorage reviewStorage;
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
+    private final EventDbStorage eventStorage;
 
     @Autowired
     public ReviewService(ReviewDaoStorage reviewStorage,
                          @Qualifier("UserDbStorage") UserStorage userStorage,
-                         @Qualifier("FilmDbStorage") FilmStorage filmStorage) {
+                         @Qualifier("FilmDbStorage") FilmStorage filmStorage,
+                         EventDbStorage eventStorage) {
         this.reviewStorage = reviewStorage;
         this.userStorage = userStorage;
         this.filmStorage = filmStorage;
+        this.eventStorage = eventStorage;
     }
 
     public Review addReview(Review review) {
@@ -40,21 +46,28 @@ public class ReviewService implements FilmorateService<Review> {
         if (review.getFilmId() <= 0 || filmStorage.getFilm(review.getFilmId()) == null) {
             throw new NotFoundException("Невозможно добавить отзыв, фильма с данным id не существует");
         }
-        return reviewStorage.addReview(review);
+        Review createdReview = reviewStorage.addReview(review);
+        eventStorage.fixEvent(createdReview.getUserId(), createdReview.getReviewId(), EventType.REVIEW, Operation.ADD);
+        return createdReview;
     }
 
     public Review updateReview(Review review) {
         validation(review);
-        if (reviewStorage.getReview(review.getReviewId()) == null) {
+        Review foundReview = reviewStorage.getReview(review.getReviewId());
+        if (foundReview == null) {
             throw new NotFoundException("Отзыва с данным id не существует");
         }
-        return reviewStorage.updateReview(review);
+        Review updatedReview = reviewStorage.updateReview(review);
+        eventStorage.fixEvent(updatedReview.getUserId(), updatedReview.getReviewId(), EventType.REVIEW, Operation.UPDATE);
+        return updatedReview;
     }
 
     public void deleteReview(Long id) {
-        if (reviewStorage.getReview(id) == null) {
+        Review review = reviewStorage.getReview(id);
+        if (review == null) {
             throw new NotFoundException("Отзыва с данным id не существует");
         }
+        eventStorage.fixEvent(review.getUserId(), id, EventType.REVIEW, Operation.REMOVE);
         reviewStorage.deleteReview(id);
     }
 

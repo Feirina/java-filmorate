@@ -4,7 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Operation;
+import ru.yandex.practicum.filmorate.storage.event.EventDaoStorage;
 import ru.yandex.practicum.filmorate.storage.director.DirectorDaoStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.likes.LikesDaoStorage;
@@ -19,16 +22,19 @@ public class FilmService implements FilmorateService<Film> {
     private final LikesDaoStorage likesStorage;
     private final UserStorage userStorage;
     private final DirectorDaoStorage directorStorage;
+    private final EventDaoStorage eventStorage;
 
     @Autowired
     public FilmService(@Qualifier("FilmDbStorage") FilmStorage filmStorage,
                        LikesDaoStorage likesStorage,
                        @Qualifier("UserDbStorage") UserStorage userStorage,
-                       DirectorDaoStorage directorStorage) {
+                       DirectorDaoStorage directorStorage,
+                       EventDaoStorage eventStorage) {
         this.filmStorage = filmStorage;
         this.likesStorage = likesStorage;
         this.userStorage = userStorage;
         this.directorStorage = directorStorage;
+        this.eventStorage = eventStorage;
     }
 
     public void addLikeToFilm(Long filmId, Long userId) {
@@ -38,6 +44,7 @@ public class FilmService implements FilmorateService<Film> {
             throw new NotFoundException("Невозможно добавить лайк пользователя с данным id не существует");
         }
         likesStorage.addLikeToFilm(filmId, userId);
+        eventStorage.fixEvent(userId, filmId, EventType.LIKE, Operation.ADD);
     }
 
     public void deleteLikeOfFilm(Long filmId, Long userId) {
@@ -47,6 +54,7 @@ public class FilmService implements FilmorateService<Film> {
             throw new NotFoundException("Невозможно удалить лайк пользователя с данным id не существует");
         }
         likesStorage.deleteLikeOfFilm(filmId, userId);
+        eventStorage.fixEvent(userId, filmId, EventType.LIKE, Operation.REMOVE);
     }
 
     public List<Film> getListOfMostPopularFilm(Integer count, Integer genreId, Integer year) {

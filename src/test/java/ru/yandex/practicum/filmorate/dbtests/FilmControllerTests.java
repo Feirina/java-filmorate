@@ -10,9 +10,7 @@ import ru.yandex.practicum.filmorate.controller.DirectorController;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -165,5 +163,43 @@ class FilmControllerTests {
                 .name("T")
                 .build();
         directorController.create(director1);
+    }
+
+    @Test
+    void likeAddGetFeedTest() {
+        final Film film1 = filmController.create(film);
+        final User user1 = userController.create(user);
+        filmController.addLikeToFilm(film1.getId(), user1.getId());
+
+        final Event addEvent = Event.builder()
+                .eventType(EventType.LIKE)
+                .operation(Operation.ADD)
+                .entityId(1L)
+                .userId(1L)
+                .build();
+
+        assertEquals(List.of(addEvent), userController.getFeed(1L));
+    }
+
+    @Test
+    void likeRemoveGetFeedTest() {
+        final Film film1 = filmController.create(film);
+        final User user1 = userController.create(user);
+        filmController.addLikeToFilm(film1.getId(), user1.getId());
+        filmController.deleteLikeOfFilm(film1.getId(), user1.getId());
+        final Event addEvent = Event.builder()
+                .eventType(EventType.LIKE)
+                .operation(Operation.ADD)
+                .entityId(1L)
+                .userId(1L)
+                .build();
+        final Event removeEvent = Event.builder()
+                .eventType(EventType.LIKE)
+                .operation(Operation.REMOVE)
+                .entityId(1L)
+                .userId(1L)
+                .build();
+
+        assertEquals(List.of(addEvent, removeEvent), userController.getFeed(1L));
     }
 }
