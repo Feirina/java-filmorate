@@ -56,7 +56,7 @@ public class Mappers {
     }
 
     public Review makeReview(ResultSet rs) throws SQLException {
-        Review review = Review.builder()
+        return Review.builder()
                 .reviewId(rs.getLong("id"))
                 .content(rs.getString("content"))
                 .isPositive(rs.getBoolean("is_positive"))
@@ -64,7 +64,6 @@ public class Mappers {
                 .filmId(rs.getLong("film_id"))
                 .useful(rs.getLong("like_value"))
                 .build();
-        return review;
     }
 
     public Event makeEvent(ResultSet rs) throws SQLException {

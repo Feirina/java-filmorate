@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.storage.likes.LikesDaoStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -129,7 +130,7 @@ public class FilmService implements FilmorateService<Film> {
         } else if (by.contains("title") && by.contains("director") && by.size() == 2) {
             return filmStorage.searchFilmByTitleAndDirect(query);
         }
-        return null;
+        return Collections.emptyList();
     }
 
 }

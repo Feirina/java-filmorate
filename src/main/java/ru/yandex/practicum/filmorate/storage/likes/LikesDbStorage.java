@@ -2,27 +2,20 @@ package ru.yandex.practicum.filmorate.storage.likes;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.storage.Mappers;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Component
 public class LikesDbStorage implements LikesDaoStorage{
     private final JdbcTemplate jdbcTemplate;
-    private final Mappers mappers;
 
-    public LikesDbStorage(JdbcTemplate jdbcTemplate, Mappers mappers) {
+    public LikesDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.mappers = mappers;
     }
 
     @Override
     public void addLikeToFilm(Long filmId, Long userId) {
-        final String sql = "INSERT INTO user_likes_film (user_id, film_id) VALUES (?, ?)";
+        final String sql = "MERGE INTO user_likes_film (user_id, film_id) VALUES (?, ?)";
         jdbcTemplate.update(sql, userId, filmId);
     }
 

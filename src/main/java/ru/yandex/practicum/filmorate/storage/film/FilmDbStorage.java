@@ -25,7 +25,7 @@ import java.util.Set;
 @Slf4j
 @Component("FilmDbStorage")
 public class FilmDbStorage implements FilmStorage {
-    private final static LocalDate DATE_OF_FIRST_FILM_RELEASE = LocalDate.of(1895, 12, 28);
+    private static final LocalDate DATE_OF_FIRST_FILM_RELEASE = LocalDate.of(1895, 12, 28);
     private final JdbcTemplate jdbcTemplate;
     private final Mappers mappers;
 
