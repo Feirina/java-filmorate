@@ -55,9 +55,10 @@ public class ReviewService implements FilmorateService<Review> {
         if (foundReview == null) {
             throw new NotFoundException("Отзыва с данным id не существует");
         }
-        Review updatedReview = reviewStorage.updateReview(review);
-        eventStorage.fixEvent(updatedReview.getUserId(), updatedReview.getReviewId(), EventType.REVIEW, Operation.UPDATE);
-        return updatedReview;
+        foundReview.setContent(review.getContent());
+        foundReview.setIsPositive(review.getIsPositive());
+        eventStorage.fixEvent(foundReview.getUserId(), foundReview.getReviewId(), EventType.REVIEW, Operation.UPDATE);
+        return reviewStorage.updateReview(foundReview);
     }
 
     public void deleteReview(Long id) {
