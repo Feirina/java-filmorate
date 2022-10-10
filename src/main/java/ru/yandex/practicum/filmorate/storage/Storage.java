@@ -21,18 +21,15 @@ public abstract class Storage<T> {
     }
 
     public T update(T object) {
-        validation(object);
         log.info("Данные {} обновлены", object);
         return object;
     }
 
     public T create(T object) {
-        validation(object);
         log.info("Данные {} сохранены", object);
         return object;
     }
 
     public abstract Map<Long, T> getMap();
 
-    public abstract void validation(T object);
 }

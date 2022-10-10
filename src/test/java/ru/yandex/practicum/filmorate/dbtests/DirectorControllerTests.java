@@ -19,13 +19,12 @@ import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class DirectorControllerTests {
+class DirectorControllerTests {
 
     @Autowired
     private FilmController filmController;
@@ -35,32 +34,28 @@ public class DirectorControllerTests {
     private UserController userController;
 
     private Film createFilm() {
-        Film film = Film.builder()
+        return Film.builder()
                 .name("name")
                 .description("new Film")
                 .duration(130)
                 .releaseDate(LocalDate.of(2002, 5, 20))
                 .mpa(Mpa.builder().id(1L).name("G").build())
                 .build();
-        return film;
     }
 
     private User createUser() {
-        User user = User.builder()
+        return User.builder()
                 .email("email@co")
                 .login("login")
                 .name("name")
                 .birthday(LocalDate.of(2000, 4, 15))
                 .build();
-        return user;
     }
 
     private Director createDirector() {
-
-        Director director = Director.builder()
+        return Director.builder()
                 .name("name")
                 .build();
-        return director;
     }
 
     @Test

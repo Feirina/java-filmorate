@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -15,7 +14,7 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
 
-@Slf4j
+
 @Service
 public class ReviewService implements FilmorateService<Review> {
     private final ReviewDaoStorage reviewStorage;
@@ -55,9 +54,10 @@ public class ReviewService implements FilmorateService<Review> {
         if (foundReview == null) {
             throw new NotFoundException("Отзыва с данным id не существует");
         }
-        Review updatedReview = reviewStorage.updateReview(review);
-        eventStorage.fixEvent(updatedReview.getUserId(), updatedReview.getReviewId(), EventType.REVIEW, Operation.UPDATE);
-        return updatedReview;
+        foundReview.setContent(review.getContent());
+        foundReview.setIsPositive(review.getIsPositive());
+        eventStorage.fixEvent(foundReview.getUserId(), foundReview.getReviewId(), EventType.REVIEW, Operation.UPDATE);
+        return reviewStorage.updateReview(foundReview);
     }
 
     public void deleteReview(Long id) {

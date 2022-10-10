@@ -1,8 +1,10 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.BadRequestException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -13,12 +15,16 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.likes.LikesDaoStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@Slf4j
 @Service
 public class FilmService implements FilmorateService<Film> {
+    private static final LocalDate DATE_OF_FIRST_FILM_RELEASE = LocalDate.of(1895, 12, 28);
+
     private final FilmStorage filmStorage;
 
     private final LikesDaoStorage likesStorage;
@@ -84,8 +90,8 @@ public class FilmService implements FilmorateService<Film> {
     }
 
     public Film createFilm(Film film) {
-        Film createdFilm = filmStorage.createFilm(film);
-        return getById(createdFilm.getId());
+        filmDateValidation(film);
+        return filmStorage.createFilm(film);
     }
 
     public void deleteFilm(Long id) {
@@ -99,8 +105,8 @@ public class FilmService implements FilmorateService<Film> {
         if (filmStorage.getFilm(film.getId()) == null) {
             throw new NotFoundException("Фильма с данным id не существует");
         }
-        Film updatedFilm = filmStorage.updateFilm(film);
-        return getById(updatedFilm.getId());
+        filmDateValidation(film);
+        return filmStorage.updateFilm(film);
     }
 
     @Override
@@ -135,4 +141,10 @@ public class FilmService implements FilmorateService<Film> {
         return Collections.emptyList();
     }
 
+    private void filmDateValidation(Film film) {
+        if (film.getReleaseDate().isBefore(DATE_OF_FIRST_FILM_RELEASE)) {
+            log.error("При попытке создать или обновить фильм произошла ошибка даты релиза фильма");
+            throw new BadRequestException("Дата релиза фильма не может быть раньше 28.12.1895");
+        }
+    }
 }
