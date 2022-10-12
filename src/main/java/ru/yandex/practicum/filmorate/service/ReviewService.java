@@ -4,8 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.EventType;
-import ru.yandex.practicum.filmorate.model.Operation;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.event.EventDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -13,6 +11,9 @@ import ru.yandex.practicum.filmorate.storage.review.ReviewDaoStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
+
+import static ru.yandex.practicum.filmorate.model.EventType.REVIEW;
+import static ru.yandex.practicum.filmorate.model.Operation.*;
 
 
 @Service
@@ -48,7 +49,7 @@ public class ReviewService implements FilmorateService<Review> {
             throw new NotFoundException("Невозможно добавить отзыв, фильма с данным id не существует");
         }
         Review createdReview = reviewStorage.addReview(review);
-        eventStorage.fixEvent(createdReview.getUserId(), createdReview.getReviewId(), EventType.REVIEW, Operation.ADD);
+        eventStorage.fixEvent(createdReview.getUserId(), createdReview.getReviewId(), REVIEW, ADD);
 
         return createdReview;
     }
@@ -60,7 +61,7 @@ public class ReviewService implements FilmorateService<Review> {
         }
         foundReview.setContent(review.getContent());
         foundReview.setIsPositive(review.getIsPositive());
-        eventStorage.fixEvent(foundReview.getUserId(), foundReview.getReviewId(), EventType.REVIEW, Operation.UPDATE);
+        eventStorage.fixEvent(foundReview.getUserId(), foundReview.getReviewId(), REVIEW, UPDATE);
 
         return reviewStorage.updateReview(foundReview);
     }
@@ -70,7 +71,7 @@ public class ReviewService implements FilmorateService<Review> {
         if (review == null) {
             throw new NotFoundException("Отзыва с данным id не существует");
         }
-        eventStorage.fixEvent(review.getUserId(), id, EventType.REVIEW, Operation.REMOVE);
+        eventStorage.fixEvent(review.getUserId(), id, REVIEW, REMOVE);
         reviewStorage.deleteReview(id);
     }
 

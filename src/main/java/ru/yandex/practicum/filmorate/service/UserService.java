@@ -4,13 +4,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.event.EventDaoStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.friends.FriendsDaoStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
+
+import static ru.yandex.practicum.filmorate.model.EventType.FRIEND;
+import static ru.yandex.practicum.filmorate.model.Operation.ADD;
+import static ru.yandex.practicum.filmorate.model.Operation.REMOVE;
 
 @Service
 public class UserService implements FilmorateService<User> {
@@ -39,7 +45,7 @@ public class UserService implements FilmorateService<User> {
             throw new NotFoundException("Невозможно добавить в друзья - пользователя с данным id не существует");
         }
         friendsStorage.addToFriends(id, friendId);
-        eventStorage.fixEvent(id, friendId, EventType.FRIEND, Operation.ADD);
+        eventStorage.fixEvent(id, friendId, FRIEND, ADD);
     }
 
     public void removeFromFriends(Long id, Long friendId) {
@@ -47,7 +53,7 @@ public class UserService implements FilmorateService<User> {
             throw new NotFoundException("Невозможно удалить из друзей - пользователя с данным id не существует");
         }
         friendsStorage.removeFromFriends(id, friendId);
-        eventStorage.fixEvent(id, friendId, EventType.FRIEND, Operation.REMOVE);
+        eventStorage.fixEvent(id, friendId, FRIEND, REMOVE);
     }
 
     public List<User> getListOfMutualFriends(Long id, Long otherId) {

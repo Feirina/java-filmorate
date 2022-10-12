@@ -6,11 +6,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.BadRequestException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Operation;
-import ru.yandex.practicum.filmorate.storage.event.EventDaoStorage;
 import ru.yandex.practicum.filmorate.storage.director.DirectorDaoStorage;
+import ru.yandex.practicum.filmorate.storage.event.EventDaoStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.likes.LikesDaoStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -19,6 +17,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static ru.yandex.practicum.filmorate.model.EventType.LIKE;
+import static ru.yandex.practicum.filmorate.model.Operation.ADD;
+import static ru.yandex.practicum.filmorate.model.Operation.REMOVE;
 
 @Slf4j
 @Service
@@ -55,7 +57,7 @@ public class FilmService implements FilmorateService<Film> {
             throw new NotFoundException("Невозможно добавить лайк пользователя с данным id не существует");
         }
         likesStorage.addLikeToFilm(filmId, userId);
-        eventStorage.fixEvent(userId, filmId, EventType.LIKE, Operation.ADD);
+        eventStorage.fixEvent(userId, filmId, LIKE, ADD);
     }
 
     public void deleteLikeOfFilm(Long filmId, Long userId) {
@@ -65,7 +67,7 @@ public class FilmService implements FilmorateService<Film> {
             throw new NotFoundException("Невозможно удалить лайк пользователя с данным id не существует");
         }
         likesStorage.deleteLikeOfFilm(filmId, userId);
-        eventStorage.fixEvent(userId, filmId, EventType.LIKE, Operation.REMOVE);
+        eventStorage.fixEvent(userId, filmId, LIKE, REMOVE);
     }
 
     public List<Film> getListOfMostPopularFilm(Integer count, Integer genreId, Integer year) {
