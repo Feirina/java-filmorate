@@ -56,16 +56,17 @@ public class ReviewService implements FilmorateService<Review> {
     }
 
     public Review updateReview(Review review) {
-        Optional<Review> foundReview = reviewStorage.getReview(review.getReviewId());
-        if (foundReview.isEmpty()) {
+        Optional<Review> reviewResponse = reviewStorage.getReview(review.getReviewId());
+        if (reviewResponse.isEmpty()) {
             throw new NotFoundException("Отзыва с данным id не существует");
         }
-        foundReview.get().setContent(review.getContent());
-        foundReview.get().setIsPositive(review.getIsPositive());
-        eventStorage.fixEvent(foundReview.get().getUserId(), foundReview.get().getReviewId(), EventType.REVIEW,
+        Review foundReview = reviewResponse.get();
+        foundReview.setContent(review.getContent());
+        foundReview.setIsPositive(review.getIsPositive());
+        eventStorage.fixEvent(foundReview.getUserId(), foundReview.getReviewId(), EventType.REVIEW,
                 Operation.UPDATE);
 
-        return reviewStorage.updateReview(foundReview.get());
+        return reviewStorage.updateReview(foundReview);
     }
 
     public void deleteReview(Long id) {
