@@ -11,10 +11,7 @@ import ru.yandex.practicum.filmorate.storage.Mappers;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Component("FilmDbStorage")
 public class FilmDbStorage implements FilmStorage {
@@ -79,14 +76,14 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Film getFilm(Long id) {
+    public Optional<Film> getFilm(Long id) {
         final String sql = "SELECT * FROM film AS f LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id WHERE f.id = ?";
-        Film film = jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeFilm(rs), id)
+        Optional<Film> film = jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeFilm(rs), id)
                 .stream()
-                .findAny().orElse(null);
-        if (film != null) {
-            film.setGenres(loadGenresByFilm(id));
-            film.setDirectors(loadDirectorsByFilm(id));
+                .findAny();
+        if (film.isPresent()) {
+            film.get().setGenres(loadGenresByFilm(id));
+            film.get().setDirectors(loadDirectorsByFilm(id));
         }
 
         return film;

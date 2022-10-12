@@ -22,11 +22,7 @@ public class MpaService implements FilmorateService<Mpa> {
 
     @Override
     public Mpa getById(Long id) {
-        final Mpa mpa = ratingStorage.getRatingById(id);
-        if (mpa == null) {
-            throw new NotFoundException("Рейтинга с данным id не существует");
-        }
-
-        return mpa;
+        return ratingStorage.getRatingById(id)
+                .orElseThrow(() -> new NotFoundException("Рейтинга с данным id не существует"));
     }
 }

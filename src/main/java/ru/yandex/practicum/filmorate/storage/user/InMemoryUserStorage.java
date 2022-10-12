@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.storage.Storage;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Component("InMemoryUserStorage")
 @Slf4j
@@ -34,9 +35,9 @@ public class InMemoryUserStorage extends Storage<User> implements UserStorage{
     }
 
     @Override
-    public User getUser(Long id) {
+    public Optional<User> getUser(Long id) {
         log.info("Данные пользователя {} получены", users.get(id));
 
-        return get(id);
+        return Optional.ofNullable(get(id));
     }
 }

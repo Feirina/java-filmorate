@@ -20,11 +20,7 @@ public class GenreService implements FilmorateService<Genre> {
     }
 
     public Genre getById(Long id) {
-        Genre genre = genreStorage.getGenreById(id);
-        if (genre == null) {
-            throw new NotFoundException("Жанра с данным id не существует");
-        }
-
-        return genre;
+        return genreStorage.getGenreById(id)
+                .orElseThrow(() -> new NotFoundException("Жанра с данным id не существует"));
     }
 }
