@@ -13,6 +13,8 @@ import ru.yandex.practicum.filmorate.storage.review.ReviewDaoStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 
 @Service
@@ -40,11 +42,11 @@ public class ReviewService implements FilmorateService<Review> {
         if (review == null) {
             throw new NotFoundException("Невозможно создать отзыв. Передано пустое значение отзыва.");
         }
-        if (review.getUserId() <= 0 || userStorage.getUser(review.getUserId()) == null) {
+        if (review.getUserId() <= 0 || userStorage.getUser(review.getUserId()).isEmpty()) {
             throw new NotFoundException("Невозможно добавить отзыв, " +
                     "пользователя с данным id не существует");
         }
-        if (review.getFilmId() <= 0 || filmStorage.getFilm(review.getFilmId()) == null) {
+        if (review.getFilmId() <= 0 || filmStorage.getFilm(review.getFilmId()).isEmpty()) {
             throw new NotFoundException("Невозможно добавить отзыв, фильма с данным id не существует");
         }
         Review createdReview = reviewStorage.addReview(review);
@@ -54,23 +56,24 @@ public class ReviewService implements FilmorateService<Review> {
     }
 
     public Review updateReview(Review review) {
-        Review foundReview = reviewStorage.getReview(review.getReviewId());
-        if (foundReview == null) {
+        Optional<Review> foundReview = reviewStorage.getReview(review.getReviewId());
+        if (foundReview.isEmpty()) {
             throw new NotFoundException("Отзыва с данным id не существует");
         }
-        foundReview.setContent(review.getContent());
-        foundReview.setIsPositive(review.getIsPositive());
-        eventStorage.fixEvent(foundReview.getUserId(), foundReview.getReviewId(), EventType.REVIEW, Operation.UPDATE);
+        foundReview.get().setContent(review.getContent());
+        foundReview.get().setIsPositive(review.getIsPositive());
+        eventStorage.fixEvent(foundReview.get().getUserId(), foundReview.get().getReviewId(), EventType.REVIEW,
+                Operation.UPDATE);
 
-        return reviewStorage.updateReview(foundReview);
+        return reviewStorage.updateReview(foundReview.get());
     }
 
     public void deleteReview(Long id) {
-        Review review = reviewStorage.getReview(id);
-        if (review == null) {
+        Optional<Review> review = reviewStorage.getReview(id);
+        if (review.isEmpty()) {
             throw new NotFoundException("Отзыва с данным id не существует");
         }
-        eventStorage.fixEvent(review.getUserId(), id, EventType.REVIEW, Operation.REMOVE);
+        eventStorage.fixEvent(review.get().getUserId(), id, EventType.REVIEW, Operation.REMOVE);
         reviewStorage.deleteReview(id);
     }
 
@@ -81,12 +84,8 @@ public class ReviewService implements FilmorateService<Review> {
 
     @Override
     public Review getById(Long id) {
-        Review review = reviewStorage.getReview(id);
-        if (review == null) {
-            throw new NotFoundException("Отзыва с данным id не существует");
-        }
-
-        return review;
+        return reviewStorage.getReview(id)
+                .orElseThrow(() -> new NotFoundException("Отзыва с данным id не существует"));
     }
 
     public List<Review> getAllReviewsByFilmId(Long filmId, Integer count) {
@@ -94,45 +93,41 @@ public class ReviewService implements FilmorateService<Review> {
 
             return reviewStorage.getAllReviewsByFilmId(filmId, 10);
         }
-        if (count == null) {
+        return reviewStorage.getAllReviewsByFilmId(filmId, Objects.requireNonNullElse(count, 10));
 
-            return reviewStorage.getAllReviewsByFilmId(filmId, 10);
-        }
-
-        return reviewStorage.getAllReviewsByFilmId(filmId, count);
     }
 
     public void addLikeToReview(Long id, Long userId) {
-        if (reviewStorage.getReview(id) == null) {
+        if (reviewStorage.getReview(id).isEmpty()) {
             throw new NotFoundException("Невозможно добавить лайк отзыва с данным id не существует");
-        } else if (userStorage.getUser(userId) == null) {
+        } else if (userStorage.getUser(userId).isEmpty()) {
             throw new NotFoundException("Невозможно добавить лайк пользователя с данным id не существует");
         }
         reviewStorage.addLikeToReview(id, userId);
     }
 
     public void addDislikeToReview(Long id, Long userId) {
-        if (reviewStorage.getReview(id) == null) {
+        if (reviewStorage.getReview(id).isEmpty()) {
             throw new NotFoundException("Невозможно добавить дизлайк отзыва с данным id не существует");
-        } else if (userStorage.getUser(userId) == null) {
+        } else if (userStorage.getUser(userId).isEmpty()) {
             throw new NotFoundException("Невозможно добавить дизлайк пользователя с данным id не существует");
         }
         reviewStorage.addDislikeToReview(id, userId);
     }
 
     public void deleteLikeOfReview(Long id, Long userId) {
-        if (reviewStorage.getReview(id) == null) {
+        if (reviewStorage.getReview(id).isEmpty()) {
             throw new NotFoundException("Невозможно удалить лайк отзыва с данным id не существует");
-        } else if (userStorage.getUser(userId) == null) {
+        } else if (userStorage.getUser(userId).isEmpty()) {
             throw new NotFoundException("Невозможно удалить лайк пользователя с данным id не существует");
         }
         reviewStorage.deleteLikeOfReview(id, userId);
     }
 
     public void deleteDislikeOfReview(Long id, Long userId) {
-        if (reviewStorage.getReview(id) == null) {
+        if (reviewStorage.getReview(id).isEmpty()) {
             throw new NotFoundException("Невозможно удалить дизлайк отзыва с данным id не существует");
-        } else if (userStorage.getUser(userId) == null) {
+        } else if (userStorage.getUser(userId).isEmpty()) {
             throw new NotFoundException("Невозможно удалить дизлайк пользователя с данным id не существует");
         }
         reviewStorage.deleteDislikeOfReview(id, userId);

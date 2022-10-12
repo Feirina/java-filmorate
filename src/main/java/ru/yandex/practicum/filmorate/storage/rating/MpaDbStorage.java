@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.Mappers;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class MpaDbStorage implements MpaDaoStorage {
@@ -26,11 +27,11 @@ public class MpaDbStorage implements MpaDaoStorage {
     }
 
     @Override
-    public Mpa getRatingById(Long id) {
+    public Optional<Mpa> getRatingById(Long id) {
         final String sql = "SELECT * FROM mpa WHERE mpa_id = ?";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeRating(rs), id)
                 .stream()
-                .findAny().orElse(null);
+                .findAny();
     }
 }

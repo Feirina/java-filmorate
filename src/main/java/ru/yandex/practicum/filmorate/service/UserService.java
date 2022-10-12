@@ -35,7 +35,7 @@ public class UserService implements FilmorateService<User> {
     }
 
     public void addToFriends(Long id, Long friendId) {
-        if (userStorage.getUser(id) == null || userStorage.getUser(friendId) == null) {
+        if (userStorage.getUser(id).isEmpty() || userStorage.getUser(friendId).isEmpty()) {
             throw new NotFoundException("Невозможно добавить в друзья - пользователя с данным id не существует");
         }
         friendsStorage.addToFriends(id, friendId);
@@ -43,7 +43,7 @@ public class UserService implements FilmorateService<User> {
     }
 
     public void removeFromFriends(Long id, Long friendId) {
-        if (userStorage.getUser(id) == null || userStorage.getUser(friendId) == null) {
+        if (userStorage.getUser(id).isEmpty() || userStorage.getUser(friendId).isEmpty()) {
             throw new NotFoundException("Невозможно удалить из друзей - пользователя с данным id не существует");
         }
         friendsStorage.removeFromFriends(id, friendId);
@@ -51,7 +51,7 @@ public class UserService implements FilmorateService<User> {
     }
 
     public List<User> getListOfMutualFriends(Long id, Long otherId) {
-        if (userStorage.getUser(id) == null || userStorage.getUser(otherId) == null) {
+        if (userStorage.getUser(id).isEmpty() || userStorage.getUser(otherId).isEmpty()) {
             throw new NotFoundException("Невозможно получить список общих друзей - пользователя с данным id не существует");
         }
 
@@ -59,7 +59,7 @@ public class UserService implements FilmorateService<User> {
     }
 
     public List<User> getListOfFriends(Long id) {
-        if (userStorage.getUser(id) == null) {
+        if (userStorage.getUser(id).isEmpty()) {
             throw new NotFoundException("Невозможно получить список друзей - пользователя с данным id не существует");
         }
 
@@ -81,14 +81,14 @@ public class UserService implements FilmorateService<User> {
     }
 
     public void deleteUser(Long id) {
-        if (userStorage.getUser(id) == null) {
+        if (userStorage.getUser(id).isEmpty()) {
             throw new NotFoundException("Пользователя с данным id не существует");
         }
         userStorage.deleteUser(id);
     }
 
     public User updateUser(User user) {
-        if (userStorage.getUser(user.getId()) == null) {
+        if (userStorage.getUser(user.getId()).isEmpty()) {
             throw new NotFoundException("Пользователя с данным id не существует");
         }
         userNameValidation(user);
@@ -98,12 +98,8 @@ public class UserService implements FilmorateService<User> {
 
     @Override
     public User getById(Long id) {
-        final User user = userStorage.getUser(id);
-        if (user == null) {
-            throw new NotFoundException("Пользователя с данным id не существует");
-        }
-
-        return user;
+        return userStorage.getUser(id)
+                .orElseThrow(() -> new NotFoundException("Пользователя с данным id не существует"));
     }
 
     public List<Event> getFeed(Long id) {
@@ -111,7 +107,7 @@ public class UserService implements FilmorateService<User> {
     }
 
     public List<Film> getRecommendationsFilm(Long id) {
-        if (userStorage.getUser(id) == null) {
+        if (userStorage.getUser(id).isEmpty()) {
             throw new NotFoundException("Пользователя с данным id не существует");
         }
 
