@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.Mappers;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class GenreDbStorage implements GenreDaoStorage {
@@ -26,11 +27,11 @@ public class GenreDbStorage implements GenreDaoStorage {
     }
 
     @Override
-    public Genre getById(Long id) {
+    public Optional<Genre> getById(Long id) {
         final String sql = "SELECT * FROM genre WHERE id = ?";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeGenre(rs), id)
                 .stream()
-                .findAny().orElse(null);
+                .findAny();
     }
 }

@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.storage.Mappers;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.util.List;
+import java.util.Optional;
 
 @Component("UserDbStorage")
 public class UserDbStorage implements UserStorage{
@@ -58,10 +59,10 @@ public class UserDbStorage implements UserStorage{
     }
 
     @Override
-    public User getById(Long id) {
+    public Optional<User> getById(Long id) {
         final String sql = "SELECT * FROM filmorate_user WHERE id = ?";
         return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeUser(rs), id)
                 .stream()
-                .findAny().orElse(null);
+                .findAny();
     }
 }

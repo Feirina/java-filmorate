@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.common.CRUD;
-import ru.yandex.practicum.filmorate.common.Filmorate;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.director.DirectorDaoStorage;
@@ -10,7 +9,7 @@ import ru.yandex.practicum.filmorate.storage.director.DirectorDaoStorage;
 import java.util.List;
 
 @Service
-public class DirectorService implements Filmorate<Director>, CRUD<Director> {
+public class DirectorService implements FilmorateService<Director>, CRUD<Director> {
     private final DirectorDaoStorage directorStorage;
 
     public DirectorService(DirectorDaoStorage directorStorage) {
@@ -24,12 +23,8 @@ public class DirectorService implements Filmorate<Director>, CRUD<Director> {
 
     @Override
     public Director getById(Long id) {
-        Director director = directorStorage.getById(id);
-        if (director == null) {
-            throw new NotFoundException("Режиссера с данным id не существует");
-        }
-
-        return director;
+        return directorStorage.getById(id)
+                .orElseThrow(() -> new NotFoundException("Режиссера с данным id не существует"));
     }
 
     public Director create(Director director) {
@@ -37,14 +32,14 @@ public class DirectorService implements Filmorate<Director>, CRUD<Director> {
     }
 
     public void delete(Long id) {
-        if (directorStorage.getById(id) == null) {
+        if (directorStorage.getById(id).isEmpty()) {
             throw new NotFoundException("Режиссера с данным id не существует");
         }
         directorStorage.delete(id);
     }
 
     public Director update(Director director) {
-        if (directorStorage.getById(director.getId()) == null) {
+        if (directorStorage.getById(director.getId()).isEmpty()) {
             throw new NotFoundException("Режиссера с данным id не существует");
         }
 

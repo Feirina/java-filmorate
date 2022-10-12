@@ -5,10 +5,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.Storage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component("InMemoryFilmStorage")
 @Slf4j
@@ -38,10 +35,10 @@ public class InMemoryFilmStorage extends Storage<Film> implements FilmStorage {
     }
 
     @Override
-    public Film getById(Long id) {
+    public Optional<Film> getById(Long id) {
         log.info("Данные фильма {} получены", films.get(id));
 
-        return get(id);
+        return Optional.ofNullable(get(id));
     }
 
     @Override

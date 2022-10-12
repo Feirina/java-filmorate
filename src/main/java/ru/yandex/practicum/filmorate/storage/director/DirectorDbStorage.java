@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.storage.Mappers;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class DirectorDbStorage implements DirectorDaoStorage {
@@ -55,12 +56,12 @@ public class DirectorDbStorage implements DirectorDaoStorage {
     }
 
     @Override
-    public Director getById(Long id) {
+    public Optional<Director> getById(Long id) {
         final String sql = "SELECT * FROM director WHERE id = ?";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeDirector(rs), id)
                 .stream()
-                .findAny().orElse(null);
+                .findAny();
     }
 
     @Override

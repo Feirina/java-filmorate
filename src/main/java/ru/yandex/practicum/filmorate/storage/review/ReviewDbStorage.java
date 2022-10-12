@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.storage.Mappers;
 
 import java.sql.PreparedStatement;
 import java.util.List;
+import java.util.Optional;
 
 
 @Component
@@ -56,13 +57,13 @@ public class ReviewDbStorage implements ReviewDaoStorage {
     }
 
     @Override
-    public Review getById(Long id) {
+    public Optional<Review> getById(Long id) {
         final String sql = "SELECT r.*, rl.like_value FROM reviews AS r LEFT JOIN reviews_likes " +
                 "AS rl ON r.id = rl.review_id WHERE r.id = ?";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeReview(rs), id)
                 .stream()
-                .findAny().orElse(null);
+                .findAny();
     }
 
     @Override
