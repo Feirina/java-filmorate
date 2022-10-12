@@ -17,12 +17,12 @@ public class MpaService implements FilmorateService<Mpa> {
 
     @Override
     public List<Mpa> getAll() {
-        return ratingStorage.getAllRating();
+        return ratingStorage.getAll();
     }
 
     @Override
     public Mpa getById(Long id) {
-        return ratingStorage.getRatingById(id)
+        return ratingStorage.getById(id)
                 .orElseThrow(() -> new NotFoundException("Рейтинга с данным id не существует"));
     }
 }

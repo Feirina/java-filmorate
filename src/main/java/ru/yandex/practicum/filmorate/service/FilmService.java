@@ -4,13 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.common.CRUD;
 import ru.yandex.practicum.filmorate.exception.BadRequestException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Operation;
-import ru.yandex.practicum.filmorate.storage.event.EventDaoStorage;
 import ru.yandex.practicum.filmorate.storage.director.DirectorDaoStorage;
+import ru.yandex.practicum.filmorate.storage.event.EventDaoStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.likes.LikesDaoStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -20,9 +19,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static ru.yandex.practicum.filmorate.model.EventType.LIKE;
+import static ru.yandex.practicum.filmorate.model.Operation.ADD;
+import static ru.yandex.practicum.filmorate.model.Operation.REMOVE;
+
 @Slf4j
 @Service
-public class FilmService implements FilmorateService<Film> {
+public class FilmService implements FilmorateService<Film>, CRUD<Film> {
     private static final LocalDate DATE_OF_FIRST_FILM_RELEASE = LocalDate.of(1895, 12, 28);
 
     private final FilmStorage filmStorage;
@@ -49,23 +52,23 @@ public class FilmService implements FilmorateService<Film> {
     }
 
     public void addLikeToFilm(Long filmId, Long userId) {
-        if (filmStorage.getFilm(filmId).isEmpty()) {
+        if (filmStorage.getById(filmId).isEmpty()) {
             throw new NotFoundException("Невозможно добавить лайк фильма с данным id не существует");
-        } else if (userStorage.getUser(userId).isEmpty()) {
+        } else if (userStorage.getById(userId).isEmpty()) {
             throw new NotFoundException("Невозможно добавить лайк пользователя с данным id не существует");
         }
         likesStorage.addLikeToFilm(filmId, userId);
-        eventStorage.fixEvent(userId, filmId, EventType.LIKE, Operation.ADD);
+        eventStorage.fixEvent(userId, filmId, LIKE, ADD);
     }
 
     public void deleteLikeOfFilm(Long filmId, Long userId) {
-        if (filmStorage.getFilm(filmId).isEmpty()) {
+        if (filmStorage.getById(filmId).isEmpty()) {
             throw new NotFoundException("Невозможно удалить лайк фильма с данным id не существует");
-        } else if (userStorage.getUser(userId).isEmpty()) {
+        } else if (userStorage.getById(userId).isEmpty()) {
             throw new NotFoundException("Невозможно удалить лайк пользователя с данным id не существует");
         }
         likesStorage.deleteLikeOfFilm(filmId, userId);
-        eventStorage.fixEvent(userId, filmId, EventType.LIKE, Operation.REMOVE);
+        eventStorage.fixEvent(userId, filmId, LIKE, REMOVE);
     }
 
     public List<Film> getListOfMostPopularFilm(Integer count, Integer genreId, Integer year) {
@@ -79,7 +82,7 @@ public class FilmService implements FilmorateService<Film> {
     }
 
     public List<Film> getCommonFilms(Long id, Long friendId) {
-        if (userStorage.getUser(id).isEmpty() || userStorage.getUser(friendId).isEmpty()) {
+        if (userStorage.getById(id).isEmpty() || userStorage.getById(friendId).isEmpty()) {
             throw new NotFoundException("Невозможно получить список общих фильмов - пользователя с данным id не существует");
         }
 
@@ -91,39 +94,39 @@ public class FilmService implements FilmorateService<Film> {
         return filmStorage.getAll();
     }
 
-    public Film createFilm(Film film) {
+    public Film create(Film film) {
         if (film == null) {
             throw new NotFoundException("Невозможно создать фильм. Передано пустое значение фильма.");
         }
         throwIfFilmDateNotValid(film);
 
-        return filmStorage.createFilm(film);
+        return filmStorage.create(film);
     }
 
-    public void deleteFilm(Long id) {
-        if (filmStorage.getFilm(id).isEmpty()) {
+    public void delete(Long id) {
+        if (filmStorage.getById(id).isEmpty()) {
             throw new NotFoundException("Фильма с данным id не существует");
         }
-        filmStorage.deleteFilm(id);
+        filmStorage.delete(id);
     }
 
-    public Film updateFilm(Film film) {
-        if (filmStorage.getFilm(film.getId()).isEmpty()) {
+    public Film update(Film film) {
+        if (filmStorage.getById(film.getId()).isEmpty()) {
             throw new NotFoundException("Фильма с данным id не существует");
         }
         throwIfFilmDateNotValid(film);
 
-        return filmStorage.updateFilm(film);
+        return filmStorage.update(film);
     }
 
     @Override
     public Film getById(Long id) {
-        return filmStorage.getFilm(id)
+        return filmStorage.getById(id)
                 .orElseThrow(() -> new NotFoundException("Фильма с данным id не существует"));
     }
 
     public List<Film> findFilmsByDirector(Long directorId, String sortBy) {
-        if (directorStorage.getDirector(directorId) == null) {
+        if (directorStorage.getById(directorId).isEmpty()) {
             throw new NotFoundException("Режиссера с данным id не существует");
         }
         List<Film> films = new ArrayList<>();

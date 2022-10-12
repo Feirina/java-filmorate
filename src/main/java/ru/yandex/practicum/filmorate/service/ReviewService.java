@@ -3,9 +3,8 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.common.CRUD;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.EventType;
-import ru.yandex.practicum.filmorate.model.Operation;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.event.EventDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -16,9 +15,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static ru.yandex.practicum.filmorate.model.EventType.REVIEW;
+import static ru.yandex.practicum.filmorate.model.Operation.*;
+
 
 @Service
-public class ReviewService implements FilmorateService<Review> {
+public class ReviewService implements FilmorateService<Review>, CRUD<Review> {
     private final ReviewDaoStorage reviewStorage;
 
     private final UserStorage userStorage;
@@ -38,44 +40,43 @@ public class ReviewService implements FilmorateService<Review> {
         this.eventStorage = eventStorage;
     }
 
-    public Review addReview(Review review) {
+    public Review create(Review review) {
         if (review == null) {
             throw new NotFoundException("Невозможно создать отзыв. Передано пустое значение отзыва.");
         }
-        if (review.getUserId() <= 0 || userStorage.getUser(review.getUserId()).isEmpty()) {
+        if (review.getUserId() <= 0 || userStorage.getById(review.getUserId()).isEmpty()) {
             throw new NotFoundException("Невозможно добавить отзыв, " +
                     "пользователя с данным id не существует");
         }
-        if (review.getFilmId() <= 0 || filmStorage.getFilm(review.getFilmId()).isEmpty()) {
+        if (review.getFilmId() <= 0 || filmStorage.getById(review.getFilmId()).isEmpty()) {
             throw new NotFoundException("Невозможно добавить отзыв, фильма с данным id не существует");
         }
-        Review createdReview = reviewStorage.addReview(review);
-        eventStorage.fixEvent(createdReview.getUserId(), createdReview.getReviewId(), EventType.REVIEW, Operation.ADD);
+        Review createdReview = reviewStorage.create(review);
+        eventStorage.fixEvent(createdReview.getUserId(), createdReview.getReviewId(), REVIEW, ADD);
 
         return createdReview;
     }
 
-    public Review updateReview(Review review) {
-        Optional<Review> reviewResponse = reviewStorage.getReview(review.getReviewId());
+    public Review update(Review review) {
+        Optional<Review> reviewResponse = reviewStorage.getById(review.getReviewId());
         if (reviewResponse.isEmpty()) {
             throw new NotFoundException("Отзыва с данным id не существует");
         }
         Review foundReview = reviewResponse.get();
         foundReview.setContent(review.getContent());
         foundReview.setIsPositive(review.getIsPositive());
-        eventStorage.fixEvent(foundReview.getUserId(), foundReview.getReviewId(), EventType.REVIEW,
-                Operation.UPDATE);
+        eventStorage.fixEvent(foundReview.getUserId(), foundReview.getReviewId(), REVIEW, UPDATE);
 
-        return reviewStorage.updateReview(foundReview);
+        return reviewStorage.update(foundReview);
     }
 
-    public void deleteReview(Long id) {
-        Optional<Review> review = reviewStorage.getReview(id);
+    public void delete(Long id) {
+        Optional<Review> review = reviewStorage.getById(id);
         if (review.isEmpty()) {
             throw new NotFoundException("Отзыва с данным id не существует");
         }
-        eventStorage.fixEvent(review.get().getUserId(), id, EventType.REVIEW, Operation.REMOVE);
-        reviewStorage.deleteReview(id);
+        eventStorage.fixEvent(review.get().getUserId(), id, REVIEW, REMOVE);
+        reviewStorage.delete(id);
     }
 
     @Override
@@ -85,7 +86,7 @@ public class ReviewService implements FilmorateService<Review> {
 
     @Override
     public Review getById(Long id) {
-        return reviewStorage.getReview(id)
+        return reviewStorage.getById(id)
                 .orElseThrow(() -> new NotFoundException("Отзыва с данным id не существует"));
     }
 
@@ -99,36 +100,36 @@ public class ReviewService implements FilmorateService<Review> {
     }
 
     public void addLikeToReview(Long id, Long userId) {
-        if (reviewStorage.getReview(id).isEmpty()) {
+        if (reviewStorage.getById(id).isEmpty()) {
             throw new NotFoundException("Невозможно добавить лайк отзыва с данным id не существует");
-        } else if (userStorage.getUser(userId).isEmpty()) {
+        } else if (userStorage.getById(userId).isEmpty()) {
             throw new NotFoundException("Невозможно добавить лайк пользователя с данным id не существует");
         }
         reviewStorage.addLikeToReview(id, userId);
     }
 
     public void addDislikeToReview(Long id, Long userId) {
-        if (reviewStorage.getReview(id).isEmpty()) {
+        if (reviewStorage.getById(id).isEmpty()) {
             throw new NotFoundException("Невозможно добавить дизлайк отзыва с данным id не существует");
-        } else if (userStorage.getUser(userId).isEmpty()) {
+        } else if (userStorage.getById(userId).isEmpty()) {
             throw new NotFoundException("Невозможно добавить дизлайк пользователя с данным id не существует");
         }
         reviewStorage.addDislikeToReview(id, userId);
     }
 
     public void deleteLikeOfReview(Long id, Long userId) {
-        if (reviewStorage.getReview(id).isEmpty()) {
+        if (reviewStorage.getById(id).isEmpty()) {
             throw new NotFoundException("Невозможно удалить лайк отзыва с данным id не существует");
-        } else if (userStorage.getUser(userId).isEmpty()) {
+        } else if (userStorage.getById(userId).isEmpty()) {
             throw new NotFoundException("Невозможно удалить лайк пользователя с данным id не существует");
         }
         reviewStorage.deleteLikeOfReview(id, userId);
     }
 
     public void deleteDislikeOfReview(Long id, Long userId) {
-        if (reviewStorage.getReview(id).isEmpty()) {
+        if (reviewStorage.getById(id).isEmpty()) {
             throw new NotFoundException("Невозможно удалить дизлайк отзыва с данным id не существует");
-        } else if (userStorage.getUser(userId).isEmpty()) {
+        } else if (userStorage.getById(userId).isEmpty()) {
             throw new NotFoundException("Невозможно удалить дизлайк пользователя с данным id не существует");
         }
         reviewStorage.deleteDislikeOfReview(id, userId);

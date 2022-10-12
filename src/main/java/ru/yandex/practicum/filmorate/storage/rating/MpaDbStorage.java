@@ -20,14 +20,14 @@ public class MpaDbStorage implements MpaDaoStorage {
     }
 
     @Override
-    public List<Mpa> getAllRating() {
+    public List<Mpa> getAll() {
         final String sql = "SELECT * FROM mpa";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeRating(rs));
     }
 
     @Override
-    public Optional<Mpa> getRatingById(Long id) {
+    public Optional<Mpa> getById(Long id) {
         final String sql = "SELECT * FROM mpa WHERE mpa_id = ?";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeRating(rs), id)

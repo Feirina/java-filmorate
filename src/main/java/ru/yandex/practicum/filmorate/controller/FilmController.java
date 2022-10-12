@@ -32,17 +32,17 @@ public class FilmController {
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        return filmService.createFilm(film);
+        return filmService.create(film);
     }
 
     @DeleteMapping("/{id}")
     public void deleteFilm(@PathVariable Long id) {
-        filmService.deleteFilm(id);
+        filmService.delete(id);
     }
 
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
-        return filmService.updateFilm(film);
+        return filmService.update(film);
     }
 
     @PutMapping("/{id}/like/{userId}")

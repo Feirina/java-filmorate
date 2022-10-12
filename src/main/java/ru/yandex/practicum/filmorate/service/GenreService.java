@@ -16,11 +16,11 @@ public class GenreService implements FilmorateService<Genre> {
     }
 
     public List<Genre> getAll() {
-        return genreStorage.getAllGenre();
+        return genreStorage.getAll();
     }
 
     public Genre getById(Long id) {
-        return genreStorage.getGenreById(id)
+        return genreStorage.getById(id)
                 .orElseThrow(() -> new NotFoundException("Жанра с данным id не существует"));
     }
 }

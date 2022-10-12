@@ -32,17 +32,17 @@ public class DirectorController {
 
     @PostMapping
     public Director create(@Valid @RequestBody Director director) {
-        return directorService.createDirector(director);
+        return directorService.create(director);
     }
 
     @DeleteMapping("/{id}")
     public void deleteDirector(@PathVariable Long id) {
-        directorService.deleteDirector(id);
+        directorService.delete(id);
     }
 
     @PutMapping
     public Director updateDirector(@Valid @RequestBody Director director) {
-        return directorService.updateDirector(director);
+        return directorService.update(director);
     }
 
 }

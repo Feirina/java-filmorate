@@ -22,7 +22,7 @@ public class ReviewController {
 
     @PostMapping
     public Review create(@Valid @RequestBody Review review) {
-        return reviewService.addReview(review);
+        return reviewService.create(review);
     }
 
     @GetMapping
@@ -36,12 +36,12 @@ public class ReviewController {
 
     @PutMapping
     public Review updateReview(@Valid @RequestBody Review review) {
-        return reviewService.updateReview(review);
+        return reviewService.update(review);
     }
 
     @DeleteMapping("/{id}")
     public void deleteReview(@PathVariable Long id) {
-        reviewService.deleteReview(id);
+        reviewService.delete(id);
     }
 
     @GetMapping("/{id}")

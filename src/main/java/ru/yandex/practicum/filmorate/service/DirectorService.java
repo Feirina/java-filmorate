@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.common.CRUD;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.director.DirectorDaoStorage;
@@ -8,7 +9,7 @@ import ru.yandex.practicum.filmorate.storage.director.DirectorDaoStorage;
 import java.util.List;
 
 @Service
-public class DirectorService implements FilmorateService<Director> {
+public class DirectorService implements FilmorateService<Director>, CRUD<Director> {
     private final DirectorDaoStorage directorStorage;
 
     public DirectorService(DirectorDaoStorage directorStorage) {
@@ -22,31 +23,27 @@ public class DirectorService implements FilmorateService<Director> {
 
     @Override
     public Director getById(Long id) {
-        Director director = directorStorage.getDirector(id);
-        if (director == null) {
+        return directorStorage.getById(id)
+                .orElseThrow(() -> new NotFoundException("Режиссера с данным id не существует"));
+    }
+
+    public Director create(Director director) {
+        return directorStorage.create(director);
+    }
+
+    public void delete(Long id) {
+        if (directorStorage.getById(id).isEmpty()) {
+            throw new NotFoundException("Режиссера с данным id не существует");
+        }
+        directorStorage.delete(id);
+    }
+
+    public Director update(Director director) {
+        if (directorStorage.getById(director.getId()).isEmpty()) {
             throw new NotFoundException("Режиссера с данным id не существует");
         }
 
-        return director;
-    }
-
-    public Director createDirector(Director director) {
-        return directorStorage.createDirector(director);
-    }
-
-    public void deleteDirector(Long id) {
-        if (directorStorage.getDirector(id) == null) {
-            throw new NotFoundException("Режиссера с данным id не существует");
-        }
-        directorStorage.deleteDirector(id);
-    }
-
-    public Director updateDirector(Director director) {
-        if (directorStorage.getDirector(director.getId()) == null) {
-            throw new NotFoundException("Режиссера с данным id не существует");
-        }
-
-        return directorStorage.updateDirector(director);
+        return directorStorage.update(director);
     }
 
 }
