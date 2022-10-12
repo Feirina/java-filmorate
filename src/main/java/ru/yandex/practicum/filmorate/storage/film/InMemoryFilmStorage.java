@@ -23,22 +23,22 @@ public class InMemoryFilmStorage extends Storage<Film> implements FilmStorage {
     }
 
     @Override
-    public Film createFilm(Film film) {
+    public Film create(Film film) {
         return create(film);
     }
 
     @Override
-    public void deleteFilm(Long id) {
+    public void delete(Long id) {
         delete(id);
     }
 
     @Override
-    public Film updateFilm(Film film) {
+    public Film update(Film film) {
         return update(film);
     }
 
     @Override
-    public Film getFilm(Long id) {
+    public Film getById(Long id) {
         log.info("Данные фильма {} получены", films.get(id));
 
         return get(id);

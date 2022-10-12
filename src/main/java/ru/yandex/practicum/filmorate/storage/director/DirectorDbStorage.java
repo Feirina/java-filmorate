@@ -29,7 +29,7 @@ public class DirectorDbStorage implements DirectorDaoStorage {
     }
 
     @Override
-    public Director createDirector(Director director) {
+    public Director create(Director director) {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("director")
                 .usingGeneratedKeyColumns("id");
@@ -41,13 +41,13 @@ public class DirectorDbStorage implements DirectorDaoStorage {
     }
 
     @Override
-    public void deleteDirector(Long id) {
+    public void delete(Long id) {
         final String sql = "DELETE FROM director WHERE id = ?";
         jdbcTemplate.update(sql, id);
     }
 
     @Override
-    public Director updateDirector(Director director) {
+    public Director update(Director director) {
         String sql = "UPDATE director SET name = ? WHERE id = ?";
         jdbcTemplate.update(sql, director.getName(), director.getId());
 
@@ -55,7 +55,7 @@ public class DirectorDbStorage implements DirectorDaoStorage {
     }
 
     @Override
-    public Director getDirector(Long id) {
+    public Director getById(Long id) {
         final String sql = "SELECT * FROM director WHERE id = ?";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeDirector(rs), id)

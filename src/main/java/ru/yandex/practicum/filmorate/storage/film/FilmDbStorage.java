@@ -41,7 +41,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Film createFilm(Film film) {
+    public Film create(Film film) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         final String sql = "INSERT INTO film (name, description, duration, release_date, mpa_id) VALUES (?, ?, ?, ?, ?)";
         jdbcTemplate.update(connection -> {
@@ -61,13 +61,13 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void deleteFilm(Long id) {
+    public void delete(Long id) {
         final String sql = "DELETE FROM film WHERE id = ?";
         jdbcTemplate.update(sql, id);
     }
 
     @Override
-    public Film updateFilm(Film film) {
+    public Film update(Film film) {
         final String sql = "UPDATE film SET name = ?, description = ?, duration = ?, release_date = ?, " +
                 "MPA_ID = ? WHERE id = ?";
         jdbcTemplate.update(sql, film.getName(), film.getDescription(), film.getDuration(), film.getReleaseDate(),
@@ -79,7 +79,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Film getFilm(Long id) {
+    public Film getById(Long id) {
         final String sql = "SELECT * FROM film AS f LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id WHERE f.id = ?";
         Film film = jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeFilm(rs), id)
                 .stream()

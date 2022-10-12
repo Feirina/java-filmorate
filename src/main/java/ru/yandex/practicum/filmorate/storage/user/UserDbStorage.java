@@ -29,7 +29,7 @@ public class UserDbStorage implements UserStorage{
     }
 
     @Override
-    public User createUser(User user) {
+    public User create(User user) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         final String sql = "INSERT INTO filmorate_user (email, login, name, birthday) VALUES (?, ?, ?, ?)";
         jdbcTemplate.update(connection -> {
@@ -45,20 +45,20 @@ public class UserDbStorage implements UserStorage{
     }
 
     @Override
-    public void deleteUser(Long id) {
+    public void delete(Long id) {
         final String sql = "DELETE FROM filmorate_user WHERE id = ?";
         jdbcTemplate.update(sql, id);
     }
 
     @Override
-    public User updateUser(User user) {
+    public User update(User user) {
         final String sql = "UPDATE filmorate_user SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?";
         jdbcTemplate.update(sql, user.getEmail(), user.getLogin(), user.getName(), user.getBirthday(), user.getId());
         return user;
     }
 
     @Override
-    public User getUser(Long id) {
+    public User getById(Long id) {
         final String sql = "SELECT * FROM filmorate_user WHERE id = ?";
         return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeUser(rs), id)
                 .stream()

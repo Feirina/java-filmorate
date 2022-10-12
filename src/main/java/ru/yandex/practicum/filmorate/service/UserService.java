@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.common.CRUD;
+import ru.yandex.practicum.filmorate.common.Filmorate;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -19,7 +21,7 @@ import static ru.yandex.practicum.filmorate.model.Operation.ADD;
 import static ru.yandex.practicum.filmorate.model.Operation.REMOVE;
 
 @Service
-public class UserService implements FilmorateService<User> {
+public class UserService implements Filmorate<User>, CRUD<User> {
     private final UserStorage userStorage;
 
     private final FriendsDaoStorage friendsStorage;
@@ -41,7 +43,7 @@ public class UserService implements FilmorateService<User> {
     }
 
     public void addToFriends(Long id, Long friendId) {
-        if (userStorage.getUser(id) == null || userStorage.getUser(friendId) == null) {
+        if (userStorage.getById(id) == null || userStorage.getById(friendId) == null) {
             throw new NotFoundException("Невозможно добавить в друзья - пользователя с данным id не существует");
         }
         friendsStorage.addToFriends(id, friendId);
@@ -49,7 +51,7 @@ public class UserService implements FilmorateService<User> {
     }
 
     public void removeFromFriends(Long id, Long friendId) {
-        if (userStorage.getUser(id) == null || userStorage.getUser(friendId) == null) {
+        if (userStorage.getById(id) == null || userStorage.getById(friendId) == null) {
             throw new NotFoundException("Невозможно удалить из друзей - пользователя с данным id не существует");
         }
         friendsStorage.removeFromFriends(id, friendId);
@@ -57,7 +59,7 @@ public class UserService implements FilmorateService<User> {
     }
 
     public List<User> getListOfMutualFriends(Long id, Long otherId) {
-        if (userStorage.getUser(id) == null || userStorage.getUser(otherId) == null) {
+        if (userStorage.getById(id) == null || userStorage.getById(otherId) == null) {
             throw new NotFoundException("Невозможно получить список общих друзей - пользователя с данным id не существует");
         }
 
@@ -65,7 +67,7 @@ public class UserService implements FilmorateService<User> {
     }
 
     public List<User> getListOfFriends(Long id) {
-        if (userStorage.getUser(id) == null) {
+        if (userStorage.getById(id) == null) {
             throw new NotFoundException("Невозможно получить список друзей - пользователя с данным id не существует");
         }
 
@@ -77,34 +79,34 @@ public class UserService implements FilmorateService<User> {
         return userStorage.getAll();
     }
 
-    public User createUser(User user) {
+    public User create(User user) {
         if (user == null) {
             throw new NotFoundException("Невозможно создать пользователя. Передано пустое значение пользователя.");
         }
         userNameValidation(user);
 
-        return userStorage.createUser(user);
+        return userStorage.create(user);
     }
 
-    public void deleteUser(Long id) {
-        if (userStorage.getUser(id) == null) {
+    public void delete(Long id) {
+        if (userStorage.getById(id) == null) {
             throw new NotFoundException("Пользователя с данным id не существует");
         }
-        userStorage.deleteUser(id);
+        userStorage.delete(id);
     }
 
-    public User updateUser(User user) {
-        if (userStorage.getUser(user.getId()) == null) {
+    public User update(User user) {
+        if (userStorage.getById(user.getId()) == null) {
             throw new NotFoundException("Пользователя с данным id не существует");
         }
         userNameValidation(user);
 
-        return userStorage.updateUser(user);
+        return userStorage.update(user);
     }
 
     @Override
     public User getById(Long id) {
-        final User user = userStorage.getUser(id);
+        final User user = userStorage.getById(id);
         if (user == null) {
             throw new NotFoundException("Пользователя с данным id не существует");
         }
@@ -117,7 +119,7 @@ public class UserService implements FilmorateService<User> {
     }
 
     public List<Film> getRecommendationsFilm(Long id) {
-        if (userStorage.getUser(id) == null) {
+        if (userStorage.getById(id) == null) {
             throw new NotFoundException("Пользователя с данным id не существует");
         }
 

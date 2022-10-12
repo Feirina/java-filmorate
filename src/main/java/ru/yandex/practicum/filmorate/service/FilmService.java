@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.common.CRUD;
+import ru.yandex.practicum.filmorate.common.Filmorate;
 import ru.yandex.practicum.filmorate.exception.BadRequestException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -24,7 +26,7 @@ import static ru.yandex.practicum.filmorate.model.Operation.REMOVE;
 
 @Slf4j
 @Service
-public class FilmService implements FilmorateService<Film> {
+public class FilmService implements Filmorate<Film>, CRUD<Film> {
     private static final LocalDate DATE_OF_FIRST_FILM_RELEASE = LocalDate.of(1895, 12, 28);
 
     private final FilmStorage filmStorage;
@@ -51,9 +53,9 @@ public class FilmService implements FilmorateService<Film> {
     }
 
     public void addLikeToFilm(Long filmId, Long userId) {
-        if (filmStorage.getFilm(filmId) == null) {
+        if (filmStorage.getById(filmId) == null) {
             throw new NotFoundException("Невозможно добавить лайк фильма с данным id не существует");
-        } else if (userStorage.getUser(userId) == null) {
+        } else if (userStorage.getById(userId) == null) {
             throw new NotFoundException("Невозможно добавить лайк пользователя с данным id не существует");
         }
         likesStorage.addLikeToFilm(filmId, userId);
@@ -61,9 +63,9 @@ public class FilmService implements FilmorateService<Film> {
     }
 
     public void deleteLikeOfFilm(Long filmId, Long userId) {
-        if (filmStorage.getFilm(filmId) == null) {
+        if (filmStorage.getById(filmId) == null) {
             throw new NotFoundException("Невозможно удалить лайк фильма с данным id не существует");
-        } else if (userStorage.getUser(userId) == null) {
+        } else if (userStorage.getById(userId) == null) {
             throw new NotFoundException("Невозможно удалить лайк пользователя с данным id не существует");
         }
         likesStorage.deleteLikeOfFilm(filmId, userId);
@@ -81,7 +83,7 @@ public class FilmService implements FilmorateService<Film> {
     }
 
     public List<Film> getCommonFilms(Long id, Long friendId) {
-        if (userStorage.getUser(id) == null || userStorage.getUser(friendId) == null) {
+        if (userStorage.getById(id) == null || userStorage.getById(friendId) == null) {
             throw new NotFoundException("Невозможно получить список общих фильмов - пользователя с данным id не существует");
         }
 
@@ -93,34 +95,34 @@ public class FilmService implements FilmorateService<Film> {
         return filmStorage.getAll();
     }
 
-    public Film createFilm(Film film) {
+    public Film create(Film film) {
         if (film == null) {
             throw new NotFoundException("Невозможно создать фильм. Передано пустое значение фильма.");
         }
         throwIfFilmDateNotValid(film);
 
-        return filmStorage.createFilm(film);
+        return filmStorage.create(film);
     }
 
-    public void deleteFilm(Long id) {
-        if (filmStorage.getFilm(id) == null) {
+    public void delete(Long id) {
+        if (filmStorage.getById(id) == null) {
             throw new NotFoundException("Фильма с данным id не существует");
         }
-        filmStorage.deleteFilm(id);
+        filmStorage.delete(id);
     }
 
-    public Film updateFilm(Film film) {
-        if (filmStorage.getFilm(film.getId()) == null) {
+    public Film update(Film film) {
+        if (filmStorage.getById(film.getId()) == null) {
             throw new NotFoundException("Фильма с данным id не существует");
         }
         throwIfFilmDateNotValid(film);
 
-        return filmStorage.updateFilm(film);
+        return filmStorage.update(film);
     }
 
     @Override
     public Film getById(Long id) {
-        final Film film = filmStorage.getFilm(id);
+        final Film film = filmStorage.getById(id);
         if (film == null) {
             throw new NotFoundException("Фильма с данным id не существует");
         }
@@ -129,7 +131,7 @@ public class FilmService implements FilmorateService<Film> {
     }
 
     public List<Film> findFilmsByDirector(Long directorId, String sortBy) {
-        if (directorStorage.getDirector(directorId) == null) {
+        if (directorStorage.getById(directorId) == null) {
             throw new NotFoundException("Режиссера с данным id не существует");
         }
         List<Film> films = new ArrayList<>();

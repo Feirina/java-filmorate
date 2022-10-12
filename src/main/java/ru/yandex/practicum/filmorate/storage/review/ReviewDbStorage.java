@@ -23,7 +23,7 @@ public class ReviewDbStorage implements ReviewDaoStorage {
     }
 
     @Override
-    public Review addReview(Review review) {
+    public Review create(Review review) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         final String sql = "INSERT INTO reviews (CONTENT, IS_POSITIVE, USER_ID, FILM_ID) VALUES (?, ?, ?, ?)";
         jdbcTemplate.update(connection -> {
@@ -40,7 +40,7 @@ public class ReviewDbStorage implements ReviewDaoStorage {
     }
 
     @Override
-    public Review updateReview(Review review) {
+    public Review update(Review review) {
         final String sql = "UPDATE reviews SET CONTENT = ?, IS_POSITIVE = ? " +
                 "WHERE id = ?";
         jdbcTemplate.update(sql, review.getContent(), review.getIsPositive(),
@@ -50,13 +50,13 @@ public class ReviewDbStorage implements ReviewDaoStorage {
     }
 
     @Override
-    public void deleteReview(Long id) {
+    public void delete(Long id) {
         final String sql = "DELETE FROM reviews WHERE id = ?";
         jdbcTemplate.update(sql, id);
     }
 
     @Override
-    public Review getReview(Long id) {
+    public Review getById(Long id) {
         final String sql = "SELECT r.*, rl.like_value FROM reviews AS r LEFT JOIN reviews_likes " +
                 "AS rl ON r.id = rl.review_id WHERE r.id = ?";
 

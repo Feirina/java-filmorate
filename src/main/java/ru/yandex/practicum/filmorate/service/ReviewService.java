@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.common.CRUD;
+import ru.yandex.practicum.filmorate.common.Filmorate;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.event.EventDbStorage;
@@ -17,7 +19,7 @@ import static ru.yandex.practicum.filmorate.model.Operation.*;
 
 
 @Service
-public class ReviewService implements FilmorateService<Review> {
+public class ReviewService implements Filmorate<Review>, CRUD<Review> {
     private final ReviewDaoStorage reviewStorage;
 
     private final UserStorage userStorage;
@@ -37,25 +39,25 @@ public class ReviewService implements FilmorateService<Review> {
         this.eventStorage = eventStorage;
     }
 
-    public Review addReview(Review review) {
+    public Review create(Review review) {
         if (review == null) {
             throw new NotFoundException("Невозможно создать отзыв. Передано пустое значение отзыва.");
         }
-        if (review.getUserId() <= 0 || userStorage.getUser(review.getUserId()) == null) {
+        if (review.getUserId() <= 0 || userStorage.getById(review.getUserId()) == null) {
             throw new NotFoundException("Невозможно добавить отзыв, " +
                     "пользователя с данным id не существует");
         }
-        if (review.getFilmId() <= 0 || filmStorage.getFilm(review.getFilmId()) == null) {
+        if (review.getFilmId() <= 0 || filmStorage.getById(review.getFilmId()) == null) {
             throw new NotFoundException("Невозможно добавить отзыв, фильма с данным id не существует");
         }
-        Review createdReview = reviewStorage.addReview(review);
+        Review createdReview = reviewStorage.create(review);
         eventStorage.fixEvent(createdReview.getUserId(), createdReview.getReviewId(), REVIEW, ADD);
 
         return createdReview;
     }
 
-    public Review updateReview(Review review) {
-        Review foundReview = reviewStorage.getReview(review.getReviewId());
+    public Review update(Review review) {
+        Review foundReview = reviewStorage.getById(review.getReviewId());
         if (foundReview == null) {
             throw new NotFoundException("Отзыва с данным id не существует");
         }
@@ -63,16 +65,16 @@ public class ReviewService implements FilmorateService<Review> {
         foundReview.setIsPositive(review.getIsPositive());
         eventStorage.fixEvent(foundReview.getUserId(), foundReview.getReviewId(), REVIEW, UPDATE);
 
-        return reviewStorage.updateReview(foundReview);
+        return reviewStorage.update(foundReview);
     }
 
-    public void deleteReview(Long id) {
-        Review review = reviewStorage.getReview(id);
+    public void delete(Long id) {
+        Review review = reviewStorage.getById(id);
         if (review == null) {
             throw new NotFoundException("Отзыва с данным id не существует");
         }
         eventStorage.fixEvent(review.getUserId(), id, REVIEW, REMOVE);
-        reviewStorage.deleteReview(id);
+        reviewStorage.delete(id);
     }
 
     @Override
@@ -82,7 +84,7 @@ public class ReviewService implements FilmorateService<Review> {
 
     @Override
     public Review getById(Long id) {
-        Review review = reviewStorage.getReview(id);
+        Review review = reviewStorage.getById(id);
         if (review == null) {
             throw new NotFoundException("Отзыва с данным id не существует");
         }
@@ -104,36 +106,36 @@ public class ReviewService implements FilmorateService<Review> {
     }
 
     public void addLikeToReview(Long id, Long userId) {
-        if (reviewStorage.getReview(id) == null) {
+        if (reviewStorage.getById(id) == null) {
             throw new NotFoundException("Невозможно добавить лайк отзыва с данным id не существует");
-        } else if (userStorage.getUser(userId) == null) {
+        } else if (userStorage.getById(userId) == null) {
             throw new NotFoundException("Невозможно добавить лайк пользователя с данным id не существует");
         }
         reviewStorage.addLikeToReview(id, userId);
     }
 
     public void addDislikeToReview(Long id, Long userId) {
-        if (reviewStorage.getReview(id) == null) {
+        if (reviewStorage.getById(id) == null) {
             throw new NotFoundException("Невозможно добавить дизлайк отзыва с данным id не существует");
-        } else if (userStorage.getUser(userId) == null) {
+        } else if (userStorage.getById(userId) == null) {
             throw new NotFoundException("Невозможно добавить дизлайк пользователя с данным id не существует");
         }
         reviewStorage.addDislikeToReview(id, userId);
     }
 
     public void deleteLikeOfReview(Long id, Long userId) {
-        if (reviewStorage.getReview(id) == null) {
+        if (reviewStorage.getById(id) == null) {
             throw new NotFoundException("Невозможно удалить лайк отзыва с данным id не существует");
-        } else if (userStorage.getUser(userId) == null) {
+        } else if (userStorage.getById(userId) == null) {
             throw new NotFoundException("Невозможно удалить лайк пользователя с данным id не существует");
         }
         reviewStorage.deleteLikeOfReview(id, userId);
     }
 
     public void deleteDislikeOfReview(Long id, Long userId) {
-        if (reviewStorage.getReview(id) == null) {
+        if (reviewStorage.getById(id) == null) {
             throw new NotFoundException("Невозможно удалить дизлайк отзыва с данным id не существует");
-        } else if (userStorage.getUser(userId) == null) {
+        } else if (userStorage.getById(userId) == null) {
             throw new NotFoundException("Невозможно удалить дизлайк пользователя с данным id не существует");
         }
         reviewStorage.deleteDislikeOfReview(id, userId);

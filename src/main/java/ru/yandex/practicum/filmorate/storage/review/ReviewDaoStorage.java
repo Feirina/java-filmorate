@@ -1,21 +1,13 @@
 package ru.yandex.practicum.filmorate.storage.review;
 
+import ru.yandex.practicum.filmorate.common.CRUD;
+import ru.yandex.practicum.filmorate.common.Filmorate;
 import ru.yandex.practicum.filmorate.model.Review;
 
 import java.util.List;
 
-public interface ReviewDaoStorage {
-    Review addReview(Review review);
-
-    Review updateReview(Review review);
-
-    void deleteReview(Long id);
-
-    Review getReview(Long id);
-
+public interface ReviewDaoStorage extends Filmorate<Review>, CRUD<Review> {
     List<Review> getAllReviewsByFilmId(Long filmId, int count);
-
-    List<Review> getAll();
 
     void addLikeToReview(Long id, Long userId);
 
