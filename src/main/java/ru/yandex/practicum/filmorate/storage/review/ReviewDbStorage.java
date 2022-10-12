@@ -4,7 +4,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.Mappers;
 
@@ -25,14 +24,6 @@ public class ReviewDbStorage implements ReviewDaoStorage {
 
     @Override
     public Review addReview(Review review) {
-        if (review == null) {
-            throw new NotFoundException("Невозможно создать отзыв. Передано пустое значение отзыва.");
-        }
-        makeReview(review);
-        return review;
-    }
-
-    private void makeReview(Review review) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         final String sql = "INSERT INTO reviews (CONTENT, IS_POSITIVE, USER_ID, FILM_ID) VALUES (?, ?, ?, ?)";
         jdbcTemplate.update(connection -> {
@@ -44,6 +35,8 @@ public class ReviewDbStorage implements ReviewDaoStorage {
             return statement;
         }, keyHolder);
         review.setReviewId(keyHolder.getKey().longValue());
+
+        return review;
     }
 
     @Override
@@ -52,6 +45,7 @@ public class ReviewDbStorage implements ReviewDaoStorage {
                 "WHERE id = ?";
         jdbcTemplate.update(sql, review.getContent(), review.getIsPositive(),
                 review.getReviewId());
+
         return review;
     }
 
@@ -65,6 +59,7 @@ public class ReviewDbStorage implements ReviewDaoStorage {
     public Review getReview(Long id) {
         final String sql = "SELECT r.*, rl.like_value FROM reviews AS r LEFT JOIN reviews_likes " +
                 "AS rl ON r.id = rl.review_id WHERE r.id = ?";
+
         return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeReview(rs), id)
                 .stream()
                 .findAny().orElse(null);
@@ -75,10 +70,12 @@ public class ReviewDbStorage implements ReviewDaoStorage {
         if (filmId == null) {
             final String sql = "SELECT *, SUM(rl.like_value) FROM reviews AS r LEFT JOIN reviews_likes " +
                     "AS rl ON r.id = rl.review_id GROUP BY r.id ORDER BY SUM(rl.like_value) DESC LIMIT ?";
+
             return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeReview(rs), count);
         }
         final String sql = "SELECT *, SUM(rl.like_value) FROM reviews AS r LEFT JOIN reviews_likes " +
                 "AS rl ON r.id = rl.review_id WHERE r.film_id = ? GROUP BY r.id ORDER BY SUM(rl.like_value) DESC LIMIT ?";
+
         return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeReview(rs), filmId, count);
     }
 
@@ -87,6 +84,7 @@ public class ReviewDbStorage implements ReviewDaoStorage {
         final String sql = "SELECT *, SUM(rl.like_value) FROM reviews AS r LEFT JOIN reviews_likes " +
                 "AS rl ON r.id = rl.review_id " +
                 "group by r.id ORDER BY case when SUM(rl.like_value)>0 then 0 else 1 end, SUM(rl.like_value)";
+
         return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeReview(rs));
     }
 

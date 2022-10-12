@@ -24,6 +24,7 @@ public class DirectorDbStorage implements DirectorDaoStorage {
     @Override
     public List<Director> getAll() {
         final String sql = "SELECT * FROM director";
+
         return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeDirector(rs));
     }
 
@@ -35,6 +36,7 @@ public class DirectorDbStorage implements DirectorDaoStorage {
         Map<String, Object> values = new HashMap<>();
         values.put("NAME", director.getName());
         director.setId(simpleJdbcInsert.executeAndReturnKey(values).longValue());
+
         return director;
     }
 
@@ -48,12 +50,14 @@ public class DirectorDbStorage implements DirectorDaoStorage {
     public Director updateDirector(Director director) {
         String sql = "UPDATE director SET name = ? WHERE id = ?";
         jdbcTemplate.update(sql, director.getName(), director.getId());
+
         return director;
     }
 
     @Override
     public Director getDirector(Long id) {
         final String sql = "SELECT * FROM director WHERE id = ?";
+
         return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeDirector(rs), id)
                 .stream()
                 .findAny().orElse(null);
@@ -71,9 +75,11 @@ public class DirectorDbStorage implements DirectorDaoStorage {
                 "INNER JOIN film_directors AS fd ON f.id = fd.film_id AND fd.director_id = ? " +
                 "ORDER BY f.release_date";
         if (sortBy.equals("year")) {
+
             return jdbcTemplate.query(sqlByYear,
                     (rs, rowNum) -> rs.getLong("film_id"), directorId);
         } else {
+
             return jdbcTemplate.query(sqlByLikes,
                     (rs, rowNum) -> rs.getLong("film_id"), directorId);
         }

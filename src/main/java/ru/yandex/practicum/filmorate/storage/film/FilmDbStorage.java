@@ -4,7 +4,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -37,21 +36,12 @@ public class FilmDbStorage implements FilmStorage {
             film.setGenres(loadGenresByFilm(film.getId()));
             film.setDirectors(loadDirectorsByFilm(film.getId()));
         }
+
         return films;
     }
 
     @Override
     public Film createFilm(Film film) {
-        if (film == null) {
-            throw new NotFoundException("Невозможно создать фильм. Передано пустое значение фильма.");
-        }
-        makeFilm(film);
-        setGenreByFilm(film);
-        setDirectorByFilm(film);
-        return film;
-    }
-
-    private void makeFilm(Film film) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         final String sql = "INSERT INTO film (name, description, duration, release_date, mpa_id) VALUES (?, ?, ?, ?, ?)";
         jdbcTemplate.update(connection -> {
@@ -64,6 +54,10 @@ public class FilmDbStorage implements FilmStorage {
             return statement;
         }, keyHolder);
         film.setId(keyHolder.getKey().longValue());
+        setGenreByFilm(film);
+        setDirectorByFilm(film);
+
+        return film;
     }
 
     @Override
@@ -80,6 +74,7 @@ public class FilmDbStorage implements FilmStorage {
                 film.getMpa().getId(), film.getId());
         setGenreByFilm(film);
         setDirectorByFilm(film);
+
         return film;
     }
 
@@ -93,6 +88,7 @@ public class FilmDbStorage implements FilmStorage {
             film.setGenres(loadGenresByFilm(id));
             film.setDirectors(loadDirectorsByFilm(id));
         }
+
         return film;
     }
 
@@ -105,6 +101,7 @@ public class FilmDbStorage implements FilmStorage {
                 "GROUP BY ul2.user_id ORDER BY COUNT (ul2.film_id) DESC LIMIT 1";
         final List<Long> sameLikeUser = jdbcTemplate.queryForList(sql, Long.class, id);
         if (sameLikeUser.size() != 1) {
+
             return recommendationFilms;
         }
         final String sqlRecommend = "SELECT f.*, m.* FROM film AS f LEFT JOIN user_likes_film AS ulf ON f.id = ulf.film_id " +
@@ -114,6 +111,7 @@ public class FilmDbStorage implements FilmStorage {
         for (Film film : recommendationFilms) {
             film.setGenres(loadGenresByFilm(film.getId()));
         }
+
         return recommendationFilms;
     }
 
@@ -127,47 +125,8 @@ public class FilmDbStorage implements FilmStorage {
         for (Film film : films) {
             film.setGenres(loadGenresByFilm(film.getId()));
         }
+
         return films;
-    }
-
-    private Set<Genre> loadGenresByFilm(Long id) {
-        final String sqlGenre = "SELECT * FROM genre AS g LEFT JOIN film_genre AS fg ON g.id = fg.genre_id " +
-                "WHERE fg.film_id = ?";
-        List<Genre> genres = jdbcTemplate.query(sqlGenre, (res, rowNum) -> mappers.makeGenre(res), id);
-        return new HashSet<>(genres);
-    }
-    
-    private void setGenreByFilm(Film film) {
-        String sqlUpdateGenre = "DELETE FROM film_genre WHERE film_id = ?";
-        jdbcTemplate.update(sqlUpdateGenre, film.getId());
-        String sqlGenre = "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)";
-        Set<Genre> genres = film.getGenres();
-        if (genres == null) {
-            return;
-        }
-        for (Genre genre : genres) {
-            jdbcTemplate.update(sqlGenre, film.getId(), genre.getId());
-        }
-    }
-
-    private Set<Director> loadDirectorsByFilm(Long id) {
-        final String sql = "SELECT * FROM director AS d INNER JOIN film_directors AS fd ON d.id = fd.director_id " +
-                "AND fd.film_id = ?";
-        List<Director> directors = jdbcTemplate.query(sql, (res, rowNum) -> mappers.makeDirector(res), id);
-        return new HashSet<>(directors);
-    }
-
-    private void setDirectorByFilm(Film film) {
-        String sqlUpdateGenre = "DELETE FROM film_directors WHERE film_id = ?";
-        jdbcTemplate.update(sqlUpdateGenre, film.getId());
-        String sql = "INSERT INTO film_directors (film_id, director_id) VALUES (?, ?)";
-        Set<Director> directors = film.getDirectors();
-        if (directors == null) {
-            return;
-        }
-        for (Director director : directors) {
-            jdbcTemplate.update(sql, film.getId(), director.getId());
-        }
     }
 
     @Override
@@ -181,6 +140,7 @@ public class FilmDbStorage implements FilmStorage {
             film.setDirectors(loadDirectorsByFilm(film.getId()));
             film.setGenres(loadGenresByFilm(film.getId()));
         }
+
         return films;
     }
 
@@ -195,6 +155,7 @@ public class FilmDbStorage implements FilmStorage {
             film.setDirectors(loadDirectorsByFilm(film.getId()));
             film.setGenres(loadGenresByFilm(film.getId()));
         }
+
         return films;
     }
 
@@ -209,6 +170,51 @@ public class FilmDbStorage implements FilmStorage {
             film.setDirectors(loadDirectorsByFilm(film.getId()));
             film.setGenres(loadGenresByFilm(film.getId()));
         }
+
         return films;
+    }
+
+    private Set<Genre> loadGenresByFilm(Long id) {
+        final String sqlGenre = "SELECT * FROM genre AS g LEFT JOIN film_genre AS fg ON g.id = fg.genre_id " +
+                "WHERE fg.film_id = ?";
+        List<Genre> genres = jdbcTemplate.query(sqlGenre, (res, rowNum) -> mappers.makeGenre(res), id);
+
+        return new HashSet<>(genres);
+    }
+
+    private void setGenreByFilm(Film film) {
+        String sqlUpdateGenre = "DELETE FROM film_genre WHERE film_id = ?";
+        jdbcTemplate.update(sqlUpdateGenre, film.getId());
+        String sqlGenre = "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)";
+        Set<Genre> genres = film.getGenres();
+        if (genres == null) {
+
+            return;
+        }
+        for (Genre genre : genres) {
+            jdbcTemplate.update(sqlGenre, film.getId(), genre.getId());
+        }
+    }
+
+    private Set<Director> loadDirectorsByFilm(Long id) {
+        final String sql = "SELECT * FROM director AS d INNER JOIN film_directors AS fd ON d.id = fd.director_id " +
+                "AND fd.film_id = ?";
+        List<Director> directors = jdbcTemplate.query(sql, (res, rowNum) -> mappers.makeDirector(res), id);
+
+        return new HashSet<>(directors);
+    }
+
+    private void setDirectorByFilm(Film film) {
+        String sqlUpdateGenre = "DELETE FROM film_directors WHERE film_id = ?";
+        jdbcTemplate.update(sqlUpdateGenre, film.getId());
+        String sql = "INSERT INTO film_directors (film_id, director_id) VALUES (?, ?)";
+        Set<Director> directors = film.getDirectors();
+        if (directors == null) {
+
+            return;
+        }
+        for (Director director : directors) {
+            jdbcTemplate.update(sql, film.getId(), director.getId());
+        }
     }
 }

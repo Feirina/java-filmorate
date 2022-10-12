@@ -4,7 +4,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.Mappers;
 
@@ -31,14 +30,6 @@ public class UserDbStorage implements UserStorage{
 
     @Override
     public User createUser(User user) {
-        if (user == null) {
-            throw new NotFoundException("Невозможно создать пользователя. Передано пустое значение пользователя.");
-        }
-        makeUser(user);
-        return user;
-    }
-
-    private void makeUser(User user) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         final String sql = "INSERT INTO filmorate_user (email, login, name, birthday) VALUES (?, ?, ?, ?)";
         jdbcTemplate.update(connection -> {
@@ -50,6 +41,7 @@ public class UserDbStorage implements UserStorage{
             return statement;
         }, keyHolder);
         user.setId(keyHolder.getKey().longValue());
+        return user;
     }
 
     @Override

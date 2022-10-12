@@ -31,6 +31,7 @@ public class LikesDbStorage implements LikesDaoStorage{
             String sql = "SELECT f.id, COUNT(ulf.user_id) as l FROM film AS f " +
                     " LEFT JOIN user_likes_film AS ulf ON f.id = ulf.film_id " +
                     " GROUP BY f.id ORDER BY COUNT(ulf.user_id) DESC LIMIT ?";
+
             return jdbcTemplate.query(sql, (rs, rowNum) -> rs.getLong("id"), count);
         } else if (genreId != 0 && year != 0) {
             String sql = "SELECT f.id, COUNT(ulf.user_id) as l FROM film AS f " +
@@ -38,6 +39,7 @@ public class LikesDbStorage implements LikesDaoStorage{
                     " INNER JOIN film_genre as fg ON f.id = fg.film_id " +
                     " AND fg.genre_id = ? AND YEAR(f.release_date) = ? " +
                     " GROUP BY f.id ORDER BY COUNT(ulf.user_id) DESC LIMIT ?";
+
             return jdbcTemplate.query(sql, (rs, rowNum) -> rs.getLong("id"), genreId, year, count);
         } else if (genreId != 0) {
             String sql = "SELECT f.id, COUNT(ulf.user_id) as l FROM film AS f " +
@@ -45,12 +47,14 @@ public class LikesDbStorage implements LikesDaoStorage{
                     " INNER JOIN film_genre as fg ON f.id = fg.film_id " +
                     " AND fg.genre_id = ? " +
                     " GROUP BY f.id ORDER BY COUNT(ulf.user_id) DESC LIMIT ?";
+
             return jdbcTemplate.query(sql, (rs, rowNum) -> rs.getLong("id"), genreId, count);
         } else {
             String sql = "SELECT f.id, COUNT(ulf.user_id) as l FROM film AS f " +
                     " LEFT JOIN user_likes_film AS ulf ON f.id = ulf.film_id " +
                     " WHERE YEAR(f.release_date) = ? " +
                     " GROUP BY f.id ORDER BY COUNT(ulf.user_id) DESC LIMIT ?";
+
             return jdbcTemplate.query(sql, (rs, rowNum) -> rs.getLong("id"), year, count);
         }
     }

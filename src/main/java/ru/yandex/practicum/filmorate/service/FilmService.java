@@ -74,6 +74,7 @@ public class FilmService implements FilmorateService<Film> {
         for (Long filmId : filmsId) {
             films.add(getById(filmId));
         }
+
         return films;
     }
 
@@ -81,6 +82,7 @@ public class FilmService implements FilmorateService<Film> {
         if (userStorage.getUser(id) == null || userStorage.getUser(friendId) == null) {
             throw new NotFoundException("Невозможно получить список общих фильмов - пользователя с данным id не существует");
         }
+
         return filmStorage.getCommonFilms(id, friendId);
     }
 
@@ -90,7 +92,11 @@ public class FilmService implements FilmorateService<Film> {
     }
 
     public Film createFilm(Film film) {
-        filmDateValidation(film);
+        if (film == null) {
+            throw new NotFoundException("Невозможно создать фильм. Передано пустое значение фильма.");
+        }
+        throwIfFilmDateNotValid(film);
+
         return filmStorage.createFilm(film);
     }
 
@@ -105,7 +111,8 @@ public class FilmService implements FilmorateService<Film> {
         if (filmStorage.getFilm(film.getId()) == null) {
             throw new NotFoundException("Фильма с данным id не существует");
         }
-        filmDateValidation(film);
+        throwIfFilmDateNotValid(film);
+
         return filmStorage.updateFilm(film);
     }
 
@@ -115,6 +122,7 @@ public class FilmService implements FilmorateService<Film> {
         if (film == null) {
             throw new NotFoundException("Фильма с данным id не существует");
         }
+
         return film;
     }
 
@@ -127,21 +135,26 @@ public class FilmService implements FilmorateService<Film> {
         for (Long id : filmsId) {
             films.add(getById(id));
         }
+
         return films;
     }
 
     public List<Film> searchFilm(String query, List<String> by) {
         if (by.contains("title") && by.size() == 1) {
+
             return filmStorage.searchFilmByTitle(query);
         } else if (by.contains("director") && by.size() == 1) {
+
             return filmStorage.searchFilmByDirect(query);
         } else if (by.contains("title") && by.contains("director") && by.size() == 2) {
+
             return filmStorage.searchFilmByTitleAndDirect(query);
         }
+
         return Collections.emptyList();
     }
 
-    private void filmDateValidation(Film film) {
+    private void throwIfFilmDateNotValid(Film film) {
         if (film.getReleaseDate().isBefore(DATE_OF_FIRST_FILM_RELEASE)) {
             log.error("При попытке создать или обновить фильм произошла ошибка даты релиза фильма");
             throw new BadRequestException("Дата релиза фильма не может быть раньше 28.12.1895");

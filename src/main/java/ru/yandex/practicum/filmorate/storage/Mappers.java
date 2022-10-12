@@ -21,6 +21,7 @@ public class Mappers {
         } else {
             film.setReleaseDate(null);
         }
+
         return film;
     }
 

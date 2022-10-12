@@ -21,6 +21,7 @@ public class FriendsDbStorage implements FriendsDaoStorage{
     @Override
     public List<User> getListOfFriends(Long userId) {
         final String sql = "SELECT * FROM filmorate_user WHERE id IN (SELECT friend_id FROM friend_list WHERE user_id = ?)";
+
         return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeUser(rs), userId);
     }
 
@@ -41,6 +42,7 @@ public class FriendsDbStorage implements FriendsDaoStorage{
         final String sql = "SELECT * FROM filmorate_user WHERE id IN (SELECT friend_id FROM friend_list " +
                 "WHERE user_id = ? AND friend_id IN " +
                 "(SELECT friend_id FROM friend_list WHERE user_id = ?))";
+
         return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeUser(rs), userId, otherId);
     }
 }

@@ -54,6 +54,7 @@ public class UserService implements FilmorateService<User> {
         if (userStorage.getUser(id) == null || userStorage.getUser(otherId) == null) {
             throw new NotFoundException("Невозможно получить список общих друзей - пользователя с данным id не существует");
         }
+
         return friendsStorage.getListOfMutualFriends(id, otherId);
     }
 
@@ -61,6 +62,7 @@ public class UserService implements FilmorateService<User> {
         if (userStorage.getUser(id) == null) {
             throw new NotFoundException("Невозможно получить список друзей - пользователя с данным id не существует");
         }
+
         return friendsStorage.getListOfFriends(id);
     }
 
@@ -70,7 +72,11 @@ public class UserService implements FilmorateService<User> {
     }
 
     public User createUser(User user) {
+        if (user == null) {
+            throw new NotFoundException("Невозможно создать пользователя. Передано пустое значение пользователя.");
+        }
         userNameValidation(user);
+
         return userStorage.createUser(user);
     }
 
@@ -86,6 +92,7 @@ public class UserService implements FilmorateService<User> {
             throw new NotFoundException("Пользователя с данным id не существует");
         }
         userNameValidation(user);
+
         return userStorage.updateUser(user);
     }
 
@@ -95,6 +102,7 @@ public class UserService implements FilmorateService<User> {
         if (user == null) {
             throw new NotFoundException("Пользователя с данным id не существует");
         }
+
         return user;
     }
 
@@ -106,6 +114,7 @@ public class UserService implements FilmorateService<User> {
         if (userStorage.getUser(id) == null) {
             throw new NotFoundException("Пользователя с данным id не существует");
         }
+
         return filmStorage.getRecommendationsFilm(id);
     }
 

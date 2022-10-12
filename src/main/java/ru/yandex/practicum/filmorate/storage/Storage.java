@@ -22,11 +22,13 @@ public abstract class Storage<T> {
 
     public T update(T object) {
         log.info("Данные {} обновлены", object);
+
         return object;
     }
 
     public T create(T object) {
         log.info("Данные {} сохранены", object);
+
         return object;
     }
 

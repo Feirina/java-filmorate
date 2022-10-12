@@ -37,6 +37,9 @@ public class ReviewService implements FilmorateService<Review> {
     }
 
     public Review addReview(Review review) {
+        if (review == null) {
+            throw new NotFoundException("Невозможно создать отзыв. Передано пустое значение отзыва.");
+        }
         if (review.getUserId() <= 0 || userStorage.getUser(review.getUserId()) == null) {
             throw new NotFoundException("Невозможно добавить отзыв, " +
                     "пользователя с данным id не существует");
@@ -46,6 +49,7 @@ public class ReviewService implements FilmorateService<Review> {
         }
         Review createdReview = reviewStorage.addReview(review);
         eventStorage.fixEvent(createdReview.getUserId(), createdReview.getReviewId(), EventType.REVIEW, Operation.ADD);
+
         return createdReview;
     }
 
@@ -57,6 +61,7 @@ public class ReviewService implements FilmorateService<Review> {
         foundReview.setContent(review.getContent());
         foundReview.setIsPositive(review.getIsPositive());
         eventStorage.fixEvent(foundReview.getUserId(), foundReview.getReviewId(), EventType.REVIEW, Operation.UPDATE);
+
         return reviewStorage.updateReview(foundReview);
     }
 
@@ -80,16 +85,20 @@ public class ReviewService implements FilmorateService<Review> {
         if (review == null) {
             throw new NotFoundException("Отзыва с данным id не существует");
         }
+
         return review;
     }
 
     public List<Review> getAllReviewsByFilmId(Long filmId, Integer count) {
         if (filmId == null) {
+
             return reviewStorage.getAllReviewsByFilmId(filmId, 10);
         }
         if (count == null) {
+
             return reviewStorage.getAllReviewsByFilmId(filmId, 10);
         }
+
         return reviewStorage.getAllReviewsByFilmId(filmId, count);
     }
 

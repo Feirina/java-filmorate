@@ -26,6 +26,7 @@ public class MpaService implements FilmorateService<Mpa> {
         if (mpa == null) {
             throw new NotFoundException("Рейтинга с данным id не существует");
         }
+
         return mpa;
     }
 }

@@ -21,12 +21,14 @@ public class GenreDbStorage implements GenreDaoStorage {
     @Override
     public List<Genre> getAllGenre() {
         final String sql = "SELECT * FROM genre ORDER BY id";
+
         return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeGenre(rs));
     }
 
     @Override
     public Genre getGenreById(Long id) {
         final String sql = "SELECT * FROM genre WHERE id = ?";
+
         return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeGenre(rs), id)
                 .stream()
                 .findAny().orElse(null);

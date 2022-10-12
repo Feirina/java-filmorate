@@ -26,6 +26,7 @@ public class DirectorService implements FilmorateService<Director> {
         if (director == null) {
             throw new NotFoundException("Режиссера с данным id не существует");
         }
+
         return director;
     }
 
@@ -44,6 +45,7 @@ public class DirectorService implements FilmorateService<Director> {
         if (directorStorage.getDirector(director.getId()) == null) {
             throw new NotFoundException("Режиссера с данным id не существует");
         }
+
         return directorStorage.updateDirector(director);
     }
 

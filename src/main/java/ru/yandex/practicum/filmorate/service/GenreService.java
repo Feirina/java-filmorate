@@ -24,6 +24,7 @@ public class GenreService implements FilmorateService<Genre> {
         if (genre == null) {
             throw new NotFoundException("Жанра с данным id не существует");
         }
+
         return genre;
     }
 }

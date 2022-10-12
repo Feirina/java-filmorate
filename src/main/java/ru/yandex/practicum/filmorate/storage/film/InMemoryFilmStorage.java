@@ -40,6 +40,7 @@ public class InMemoryFilmStorage extends Storage<Film> implements FilmStorage {
     @Override
     public Film getFilm(Long id) {
         log.info("Данные фильма {} получены", films.get(id));
+
         return get(id);
     }
 
@@ -59,6 +60,7 @@ public class InMemoryFilmStorage extends Storage<Film> implements FilmStorage {
         films.sort(comparator);
         films.removeIf(film -> !film.getName().contains(query));
         log.info("Количество найденных фильмов: {}", films.size());
+
         return new ArrayList<>(films);
     }
 

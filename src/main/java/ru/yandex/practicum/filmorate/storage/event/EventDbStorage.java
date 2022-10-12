@@ -36,6 +36,7 @@ public class EventDbStorage implements EventDaoStorage {
     @Override
     public List<Event> getFeed(Long userId) {
         String sql = "SELECT * FROM FEED  WHERE USER_ID = ?";
+
         return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeEvent(rs), userId);
     }
 }
