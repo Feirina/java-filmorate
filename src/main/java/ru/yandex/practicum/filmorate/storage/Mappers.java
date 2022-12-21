@@ -1,10 +1,7 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -24,6 +21,7 @@ public class Mappers {
         } else {
             film.setReleaseDate(null);
         }
+
         return film;
     }
 
@@ -50,4 +48,35 @@ public class Mappers {
                 .name(rs.getString("mpa_name"))
                 .build();
     }
+
+    public Director makeDirector(ResultSet rs) throws SQLException {
+        return Director.builder()
+                .id(rs.getLong("id"))
+                .name(rs.getString("name"))
+                .build();
+    }
+
+    public Review makeReview(ResultSet rs) throws SQLException {
+        return Review.builder()
+                .reviewId(rs.getLong("id"))
+                .content(rs.getString("content"))
+                .isPositive(rs.getBoolean("is_positive"))
+                .userId(rs.getLong("user_id"))
+                .filmId(rs.getLong("film_id"))
+                .useful(rs.getLong("like_value"))
+                .build();
+    }
+
+    public Event makeEvent(ResultSet rs) throws SQLException {
+        return Event.builder()
+                .eventId(rs.getLong("event_id"))
+                .entityId(rs.getLong("entity_id"))
+                .userId(rs.getLong("user_id"))
+                .eventType(EventType.valueOf(rs.getString("event_type")))
+                .operation(Operation.valueOf(rs.getString("operation")))
+                .timestamp(rs.getLong("timestamp"))
+                .build();
+    }
+
 }
+

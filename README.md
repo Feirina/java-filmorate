@@ -100,3 +100,4 @@
 * [STravinJ](https://github.com/STravinJ) - на групповом этапе отвечал разрабатывал функциональности "Добавление режиссёров в фильмы" и "Вывод самых популярных фильмов по жанру и годам".
 * [TatyanaBezverkhova](https://github.com/TatyanaBezverkhova) - на групповом этапе разрабатывала функциональность "Поиск".
 * [TrapeznikovDanila](https://github.com/TrapeznikovDanila) - на групповом этапе разрабатывал функциональность "Отзывы".
+
